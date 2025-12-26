@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Search, Rocket, Cpu, Code, Gamepad2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { EventCard, type Event } from "@/components/event-card";
+import FlipCard from "./ui/FlipCard";
 
 
 const filterCategories = [
