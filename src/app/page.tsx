@@ -23,7 +23,7 @@ export default function Home() {
         <HeroRobot />
 
         {/* Content section with gradient overlay to separate from hero */}
-        <div className="min-h-screen bg-gradient-to-b from-black/80 via-neutral-900/80 to-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-10">
+        <div className="min-h-screen bg-linear-to-b from-black/80 via-neutral-900/80 to-black/80 backdrop-blur-sm p-4 sm:p-6 md:p-10">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white">
             Welcome to TechSolstice'26
           </h2>

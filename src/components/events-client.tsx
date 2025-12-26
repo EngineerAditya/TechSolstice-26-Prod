@@ -8,6 +8,7 @@ import { Search, Rocket, Cpu, Code, Gamepad2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { EventCard, type Event } from "@/components/event-card";
 
+
 const filterCategories = [
   { name: "All", icon: <Rocket size={16} /> },
   { name: "Flagship", icon: <Cpu size={16} /> },
@@ -63,7 +64,8 @@ export function EventsClient({
   return (
     <>
       {/* Filters and Search */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4 pt-32">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-4 px-4 pt-20">
+        
         <div className="flex flex-wrap justify-center gap-2">
           {filterCategories.map((filter) => (
             <Button
@@ -99,7 +101,7 @@ export function EventsClient({
       {/* Events Grid */}
       <motion.div
         layout
-        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16"
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-20 px-4"
       >
         {initialEvents.map((event) => (
           <EventCard key={event.id} event={event} />
