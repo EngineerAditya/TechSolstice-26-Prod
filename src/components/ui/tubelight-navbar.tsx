@@ -16,6 +16,7 @@ interface NavBarProps {
   className?: string
 }
 
+  import Link from "next/link"
 export function NavBar({ items, className }: NavBarProps) {
   const [activeTab, setActiveTab] = useState(items[0]?.name ?? "")
 
@@ -51,7 +52,7 @@ export function NavBar({ items, className }: NavBarProps) {
 
             return (
               <a
-                key={item.name}
+                <Link
                 href={item.url}
                 onClick={() => setActiveTab(item.name)}
                 className={cn(
@@ -86,7 +87,7 @@ export function NavBar({ items, className }: NavBarProps) {
         </div>
       </div>
     </>
-  )
+                </Link>
 }
 
 export default NavBar

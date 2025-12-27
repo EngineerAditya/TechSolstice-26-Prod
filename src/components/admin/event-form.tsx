@@ -23,6 +23,7 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
     time: event?.time || "",
     venue: event?.venue || "",
     imageUrl: event?.imageUrl || "",
+    prize_pool: event?.prize_pool || "", // ✅ Added missing field
   });
 
   const handleChange = (
@@ -69,48 +70,68 @@ export function EventForm({ event, onSave, onCancel }: EventFormProps) {
           required
         />
       </div>
+
+      {/* ✅ Added Prize Pool Input */}
       <div>
-        <Label htmlFor="category">Category</Label>
+        <Label htmlFor="prize_pool">Prize Pool</Label>
         <Input
-          id="category"
-          name="category"
-          value={formData.category}
+          id="prize_pool"
+          name="prize_pool"
+          placeholder="e.g. ₹10,000"
+          value={formData.prize_pool}
           onChange={handleChange}
           required
         />
       </div>
-      <div>
-        <Label htmlFor="date">Date</Label>
-        <Input
-          id="date"
-          name="date"
-          type="date"
-          value={formData.date}
-          onChange={handleChange}
-          required
-        />
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="category">Category</Label>
+          <Input
+            id="category"
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="venue">Venue</Label>
+          <Input
+            id="venue"
+            name="venue"
+            value={formData.venue}
+            onChange={handleChange}
+            required
+          />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="time">Time</Label>
-        <Input
-          id="time"
-          name="time"
-          type="time"
-          value={formData.time}
-          onChange={handleChange}
-          required
-        />
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label htmlFor="date">Date</Label>
+          <Input
+            id="date"
+            name="date"
+            type="date"
+            value={formData.date}
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <Label htmlFor="time">Time</Label>
+          <Input
+            id="time"
+            name="time"
+            type="time"
+            value={formData.time}
+            onChange={handleChange}
+            required
+          />
+        </div>
       </div>
-      <div>
-        <Label htmlFor="venue">Venue</Label>
-        <Input
-          id="venue"
-          name="venue"
-          value={formData.venue}
-          onChange={handleChange}
-          required
-        />
-      </div>
+
       <div>
         <Label htmlFor="imageUrl">Image URL</Label>
         <Input
