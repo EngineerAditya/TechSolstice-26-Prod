@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { motion, useAnimation } from "framer-motion";
+import { motion, useAnimation, useInView } from "framer-motion";
 
 type Props = {
   mediaSrc: string;
@@ -14,8 +14,11 @@ export default function ScrollExpansionVideo({ mediaSrc }: Props) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const controls = useAnimation();
 
-  // Check if mobile
   const [isMobile, setIsMobile] = useState(false);
+  const [expansionProgress, setExpansionProgress] = useState(0);
+  const [hasFlashed, setHasFlashed] = useState(false);
+
+  const [positionState, setPositionState] = useState<'absolute-top' | 'fixed' | 'absolute-bottom'>('absolute-top');
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
@@ -24,11 +27,7 @@ export default function ScrollExpansionVideo({ mediaSrc }: Props) {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Track expansion progress
-  const [expansionProgress, setExpansionProgress] = useState(0);
-  const [hasFlashed, setHasFlashed] = useState(false);
-
-  // Video Playback Optimization
+  // Video Autoplay Logic (Shared)
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -46,9 +45,9 @@ export default function ScrollExpansionVideo({ mediaSrc }: Props) {
 
     observer.observe(video);
     return () => observer.disconnect();
-  }, []);
+  }, [isMobile]); // Re-run if mobile state changes to re-attach to correct ref
 
-  // Track scroll and update expansion progress
+  // DESKTOP Scroll Logic
   useEffect(() => {
     if (isMobile) return;
 
@@ -59,78 +58,102 @@ export default function ScrollExpansionVideo({ mediaSrc }: Props) {
       const rect = container.getBoundingClientRect();
       const windowHeight = window.innerHeight;
 
-      // Calculate how much of the container is in view
-      // Progress goes from 0 (just entering) to 1 (fully covering viewport)
-      let progress = 0;
-
-      if (rect.top > windowHeight) {
-        // Container is below viewport
-        progress = 0;
-      } else if (rect.top <= 0 && rect.bottom >= windowHeight) {
-        // Container fully covers viewport
-        progress = 1;
-      } else if (rect.top < windowHeight && rect.top > 0) {
-        // Container is entering from bottom
-        progress = (windowHeight - rect.top) / windowHeight;
-      } else if (rect.bottom < windowHeight && rect.bottom > 0) {
-        // Container is exiting from top
-        progress = 1; // Keep it at 1 once it's past
+      // 1. PINNING LOGIC
+      if (rect.top <= 0 && rect.bottom >= windowHeight) {
+        setPositionState('fixed');
+      } else if (rect.bottom < windowHeight) {
+        setPositionState('absolute-bottom');
+      } else {
+        setPositionState('absolute-top');
       }
 
-      // Clamp between 0 and 1
-      progress = Math.max(0, Math.min(1, progress));
+      // 2. PROGRESS LOGIC
+      const scrollableDistance = rect.height - windowHeight;
+      const scrolled = -rect.top;
+      let rawProgress = scrolled / scrollableDistance;
+      rawProgress = Math.max(0, Math.min(1, rawProgress));
 
-      setExpansionProgress(progress);
+      // 3. BUFFER LOGIC (90% animation, 10% hold)
+      const animationCutoff = 0.90;
 
-      // Trigger flash when fully expanded
-      if (progress >= 0.95 && !hasFlashed) {
+      let mappedProgress = rawProgress / animationCutoff;
+      mappedProgress = Math.min(1, mappedProgress);
+
+      setExpansionProgress(mappedProgress);
+
+      // Flash Trigger
+      if (mappedProgress >= 0.99 && !hasFlashed) {
         setHasFlashed(true);
-        controls.start(
-          { opacity: [0, 0.7, 0] },
-          { duration: 0.8 }
-        );
+        controls.start({ opacity: [0, 0.7, 0] }, { duration: 0.8 });
       }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll(); // Check initial state
+    handleScroll();
 
     return () => window.removeEventListener('scroll', handleScroll);
   }, [controls, hasFlashed, isMobile]);
 
-  // Calculate video size based on expansion progress
+  // Video Size Calculation (Desktop)
   const getVideoSize = () => {
-    const startWidth = 50; // 50%
-    const endWidth = 100; // 100%
+    const startWidth = 40;
+    const endWidth = 100;
+    const startHeight = 30;
+    const endHeight = 100;
+    const startRadius = 24;
+    const endRadius = 0;
 
-    const startHeight = 40; // 40vh
-    const endHeight = 100; // 100vh
-
-    const startRadius = 20; // 20px
-    const endRadius = 0; // 0px
-
-    const width = startWidth + (endWidth - startWidth) * expansionProgress;
-    const height = startHeight + (endHeight - startHeight) * expansionProgress;
-    const radius = startRadius + (endRadius - startRadius) * expansionProgress;
+    const smoothProgress = expansionProgress * (2 - expansionProgress);
 
     return {
-      width: `${width}%`,
-      height: `${height}vh`,
-      borderRadius: `${radius}px`,
+      width: `${startWidth + (endWidth - startWidth) * smoothProgress}%`,
+      height: `${startHeight + (endHeight - startHeight) * smoothProgress}vh`,
+      borderRadius: `${startRadius + (endRadius - startRadius) * smoothProgress}px`,
     };
   };
 
   const videoSize = getVideoSize();
+  const overlayOpacity = Math.max(0, 0.4 * (1 - expansionProgress * 1.5));
+  const getContainerStyle = (): React.CSSProperties => {
+    if (positionState === 'fixed') {
+      return { position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 10 };
+    }
+    if (positionState === 'absolute-bottom') {
+      return { position: 'absolute', bottom: 0, left: 0, width: '100%', height: '100vh', zIndex: 10 };
+    }
+    return { position: 'absolute', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 10 };
+  };
 
-  // Calculate overlay opacity (fades out as it expands)
-  const overlayOpacity = Math.max(0, 0.3 * (1 - expansionProgress * 2));
+  // --- MOBILE ANIMATION COMPONENT ---
+  const MobileVideo = () => {
+    // This ref triggers the animation when the video enters the viewport
+    const mobileRef = useRef(null);
+    const isInView = useInView(mobileRef, { amount: 0.6, once: false }); // Trigger when 60% visible
 
-  // On mobile, render simple static video
-  if (isMobile) {
     return (
-      <div className="relative w-full min-h-screen flex items-center justify-center bg-black py-20">
-        <div className="w-[90%] max-w-4xl mx-auto">
-          <div className="relative w-full aspect-video overflow-hidden rounded-xl border border-white/10 bg-black/50 shadow-2xl">
+      <div className="w-full bg-black py-20 flex items-center justify-center">
+        <div ref={mobileRef} className="w-full max-w-md px-4">
+          <motion.div
+            initial={{ scale: 0.9, borderRadius: 20, filter: "brightness(0.6)" }}
+            animate={isInView ? {
+              scale: 1,
+              borderRadius: 0,
+              filter: "brightness(1)",
+              // Expand negative margin to break out of padding and go full width
+              marginLeft: "-1rem",
+              marginRight: "-1rem",
+              width: "calc(100% + 2rem)"
+            } : {
+              scale: 0.9,
+              borderRadius: 20,
+              filter: "brightness(0.6)",
+              marginLeft: "0",
+              marginRight: "0",
+              width: "100%"
+            }}
+            transition={{ duration: 0.6, ease: "circOut" }}
+            className="relative aspect-video overflow-hidden shadow-[0_0_30px_rgba(0,0,0,0.5)] border border-white/10"
+          >
             <video
               ref={videoRef}
               src={mediaSrc}
@@ -141,30 +164,42 @@ export default function ScrollExpansionVideo({ mediaSrc }: Props) {
               autoPlay
               preload="metadata"
             />
-          </div>
+
+            {/* Cyberpunk scanline overlay for mobile */}
+            <div className="absolute inset-0 bg-[linear-gradient(transparent_50%,rgba(0,0,0,0.2)_50%)] bg-[size:100%_4px] pointer-events-none opacity-30" />
+
+            {/* Border Glow Effect when active */}
+            <motion.div
+              animate={isInView ? { opacity: 0 } : { opacity: 1 }}
+              className="absolute inset-0 border-2 border-white/20 rounded-[20px] pointer-events-none"
+            />
+          </motion.div>
         </div>
       </div>
     );
+  };
+
+  if (isMobile) {
+    return <MobileVideo />;
   }
 
-  // Desktop: Scroll-driven expansion
+  // --- DESKTOP RENDER ---
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-[200vh] flex items-start justify-center bg-black"
+      className="relative w-full h-[500vh] bg-black"
     >
-      <div className="sticky top-0 w-full h-screen flex items-center justify-center overflow-hidden">
+      <div
+        style={getContainerStyle()}
+        className="flex items-center justify-center overflow-hidden"
+      >
         <motion.div
-          animate={{
+          style={{
             width: videoSize.width,
             height: videoSize.height,
             borderRadius: videoSize.borderRadius,
           }}
-          transition={{
-            duration: 0,
-            ease: "linear",
-          }}
-          className="relative overflow-hidden border border-white/10 bg-black/50 shadow-2xl"
+          className="relative overflow-hidden border border-white/10 bg-black/50 shadow-2xl z-10"
         >
           <video
             ref={videoRef}
@@ -176,17 +211,15 @@ export default function ScrollExpansionVideo({ mediaSrc }: Props) {
             preload="metadata"
           />
 
-          {/* Dark overlay that fades as video expands */}
           <div
-            className="absolute inset-0 bg-black/30 pointer-events-none transition-opacity duration-300"
+            className="absolute inset-0 bg-black/40 pointer-events-none transition-opacity duration-300"
             style={{ opacity: overlayOpacity }}
           />
 
-          {/* Flash overlay for animation */}
           <motion.div
             animate={controls}
             initial={{ opacity: 0 }}
-            className="absolute inset-0 bg-white pointer-events-none"
+            className="absolute inset-0 bg-white pointer-events-none z-20 mix-blend-overlay"
           />
         </motion.div>
       </div>

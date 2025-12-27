@@ -1,157 +1,126 @@
 "use client";
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 interface LoadingScreenProps {
-  onLoadingComplete: () => void
-  minDuration?: number // Minimum time to show loader (in ms)
+  onLoadingComplete: () => void;
+  minDuration?: number;
 }
 
-export function LoadingScreen({ onLoadingComplete, minDuration = 1500 }: LoadingScreenProps) {
-  const [progress, setProgress] = useState(0)
-  const [isComplete, setIsComplete] = useState(false)
+export function LoadingScreen({ onLoadingComplete, minDuration = 2000 }: LoadingScreenProps) {
+  const [progress, setProgress] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    let mounted = true
-    const startTime = Date.now()
+    // --- THE NUCLEAR SCROLL LOCK ---
 
-    // Track actual loading states
-    const loadingStates = {
-      fonts: false,
-      document: false,
-      images: false
-    }
+    // 1. Target both HTML and BODY
+    const html = document.documentElement;
+    const body = document.body;
 
-    const updateProgress = () => {
-      if (!mounted) return
+    // 2. Save original values (good practice, though we reset to empty usually)
+    const originalHtmlOverflow = html.style.overflow;
+    const originalBodyOverflow = body.style.overflow;
+    const originalBodyHeight = body.style.height;
 
-      const loaded = Object.values(loadingStates).filter(Boolean).length
-      const total = Object.keys(loadingStates).length
-      const actualProgress = (loaded / total) * 100
+    // 3. Apply the Lock
+    // We lock HTML to prevent the "rubber band" effect
+    html.style.overflow = "hidden";
+    // We lock Body and force it to visual viewport height
+    body.style.overflow = "hidden";
+    body.style.height = "100vh";
+    // This stops mobile touch dragging
+    body.style.touchAction = "none";
 
-      // Smooth progress updates
-      setProgress(prev => {
-        const diff = actualProgress - prev
-        return prev + Math.min(diff * 0.3, 10)
-      })
+    // Simple simulated loading progress
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        const next = prev + Math.random() * 15;
+        if (next >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return next;
+      });
+    }, 150);
 
-      if (actualProgress >= 100) {
-        const elapsed = Date.now() - startTime
-        const remaining = Math.max(0, minDuration - elapsed)
+    const timeout = setTimeout(() => {
+      setProgress(100);
+      setIsComplete(true);
+      setTimeout(() => {
+        // --- UNLOCK EVERYTHING ---
+        html.style.overflow = originalHtmlOverflow;
+        body.style.overflow = originalBodyOverflow;
+        body.style.height = originalBodyHeight;
+        body.style.touchAction = "";
 
-        setTimeout(() => {
-          if (!mounted) return
-          setProgress(100)
-          setIsComplete(true)
-          setTimeout(() => {
-            if (!mounted) return
-            onLoadingComplete()
-          }, 300)
-        }, remaining)
-      }
-    }
-
-    // Wait for fonts
-    if (document.fonts) {
-      document.fonts.ready.then(() => {
-        loadingStates.fonts = true
-        updateProgress()
-      })
-    } else {
-      loadingStates.fonts = true
-    }
-
-    // Wait for DOM
-    if (document.readyState === 'complete') {
-      loadingStates.document = true
-    } else {
-      window.addEventListener('load', () => {
-        loadingStates.document = true
-        updateProgress()
-      })
-    }
-
-    // Wait for images (check after a small delay to let page render)
-    const checkImages = () => {
-      const images = Array.from(document.images)
-      if (images.length === 0) {
-        loadingStates.images = true
-        updateProgress()
-        return
-      }
-
-      // Treat lazy-loaded images as non-blocking for the initial loader
-      const relevantImages = images.filter(img => img.loading !== 'lazy')
-
-      if (relevantImages.length === 0) {
-        loadingStates.images = true
-        updateProgress()
-        return
-      }
-
-      Promise.all(
-        relevantImages.map(img => {
-          if (img.complete) return Promise.resolve()
-          return new Promise(resolve => {
-            img.onload = () => resolve(undefined)
-            img.onerror = () => resolve(undefined) // Don't block on errors
-          })
-        })
-      ).then(() => {
-        loadingStates.images = true
-        updateProgress()
-      })
-    }
-
-    // Start checking images after a brief delay
-    setTimeout(checkImages, 100)
-
-    // Progressive updates
-    const interval = setInterval(updateProgress, 100)
+        onLoadingComplete();
+      }, 500);
+    }, minDuration);
 
     return () => {
-      mounted = false
-      clearInterval(interval)
-    }
-  }, [minDuration, onLoadingComplete])
+      clearInterval(interval);
+      clearTimeout(timeout);
+      // Safety cleanup in case component unmounts unexpectedly
+      html.style.overflow = originalHtmlOverflow;
+      body.style.overflow = originalBodyOverflow;
+      body.style.height = originalBodyHeight;
+      body.style.touchAction = "";
+    };
+  }, [minDuration, onLoadingComplete]);
+
+  if (isComplete) return null;
 
   return (
+    // Z-INDEX 999999 ensures it is above your Navbar (which is likely z-50 or z-100)
+    // overscroll-none prevents the browser bounce effect
     <div
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md transition-opacity duration-500 ${isComplete ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      className={`fixed inset-0 z-[999999] flex flex-col items-center justify-center bg-black transition-opacity duration-500 overscroll-none touch-none ${isComplete ? "opacity-0 pointer-events-none" : "opacity-100"
         }`}
     >
-      {/* Logo or Title */}
-      <div className="mb-8 text-center">
-        <h1
-          className="text-5xl sm:text-6xl md:text-7xl font-bold bg-gradient-to-r from-white via-neutral-200 to-neutral-400 bg-clip-text text-transparent"
-          style={{ fontFamily: '"Doto", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
-        >
-          TechSolstice'26
+      {/* Cyberpunk Grid Background */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,18,18,0)_1px,transparent_1px),linear-gradient(90deg,rgba(18,18,18,0)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col items-center">
+        {/* Logo Image */}
+        <div className="relative mb-6 h-20 w-20 sm:h-24 sm:w-24">
+          <Image
+            src="/logos/logo.png"
+            alt="TechSolstice Logo"
+            fill
+            className="object-contain drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"
+            priority
+          />
+        </div>
+
+        {/* Text Logo */}
+        <h1 className="font-logo text-4xl sm:text-6xl font-bold tracking-wider text-white uppercase mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
+          TECH<span className="text-red-600">SOLSTICE</span>
         </h1>
-        <p className="mt-4 text-sm sm:text-base text-neutral-400 tracking-wider">
-          LOADING EXPERIENCE
+
+        <p className="font-mono text-red-500/80 text-xs tracking-[0.3em] animate-pulse">
+          SYSTEM_INITIALIZING...
         </p>
-      </div>
 
-      {/* Minimal Progress Bar */}
-      <div className="w-64 sm:w-80 md:w-96 h-1 bg-neutral-800 rounded-full overflow-hidden">
-        <div
-          className="h-full bg-gradient-to-r from-neutral-500 via-white to-neutral-500 rounded-full transition-all duration-200 ease-out"
-          style={{ width: `${progress}%` }}
-        />
-      </div>
+        {/* Cyberpunk Progress Bar */}
+        <div className="mt-10 w-64 h-1 bg-neutral-900 relative overflow-hidden">
+          <motion.div
+            className="absolute top-0 bottom-0 left-0 bg-red-600 shadow-[0_0_15px_rgba(220,38,38,0.8)]"
+            initial={{ width: "0%" }}
+            animate={{ width: `${progress}%` }}
+            transition={{ ease: "linear" }}
+          />
+        </div>
 
-      {/* Progress Percentage */}
-      <div className="mt-4 text-neutral-500 text-sm font-mono">
-        {Math.round(progress)}%
-      </div>
-
-      {/* Subtle pulsing dot */}
-      <div className="mt-8 flex gap-2">
-        <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
-        <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-        <div className="w-2 h-2 bg-white rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
+        {/* Percentage Counter */}
+        <div className="mt-2 w-64 flex justify-between font-mono text-[10px] text-neutral-500">
+          <span>LOADING_ASSETS</span>
+          <span className="text-red-500">{Math.round(progress)}%</span>
+        </div>
       </div>
     </div>
-  )
+  );
 }

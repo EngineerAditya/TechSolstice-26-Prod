@@ -23,14 +23,14 @@ export const siteConfig = {
     generalEmail: "fest.mitblr@manipal.edu",
     contacts: [
       {
-        name: "Aishani Sharma",
-        role: "HR Head",
-        phone: "+91 95353 90081",
+        name: "Samaira Malik",
+        role: "PR Head",
+        phone: "+91 84462 03821",
       },
       {
-        name: "Swaraj Shewale",
-        role: "HR Head",
-        phone: "+91 90281 86267",
+        name: "Mahek Sethi",
+        role: "PR Head",
+        phone: "+91 98219 01461",
       },
     ],
   },
