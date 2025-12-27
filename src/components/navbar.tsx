@@ -7,7 +7,6 @@ const navItems = [
   { name: "Home", url: "/", icon: Home },
   { name: "Events", url: "/events", icon: Calendar },
   { name: "Passes", url: "/passes", icon: Ticket },
-  { name: "Contact", url: "/contact", icon: Mail },
   { name: "Profile", url: "/profile", icon: User },
 ];
 
