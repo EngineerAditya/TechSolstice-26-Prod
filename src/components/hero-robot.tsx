@@ -65,9 +65,7 @@ export function HeroRobot() {
   return (
     // Container for the hero section - full screen and responsive
     <section className="relative h-screen w-full overflow-hidden" ref={containerRef}>
-      {/* Dark base to contrast against background particles
-          Cover the entire hero area so the navbar blends seamlessly */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]" />
+      {/* Hero background no tint/blur (removed tint/blur per request) */}
 
       {/* Spline 3D Scene - only render on laptop+ to avoid loading heavy assets on small screens */}
       {isLaptopOrLarger && (

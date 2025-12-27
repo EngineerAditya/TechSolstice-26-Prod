@@ -196,11 +196,20 @@ const ASMRStaticBackground: React.FC = () => {
 
   return (
     <div className="fixed inset-0 -z-10 pointer-events-none">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full block"
-        style={{ transform: "translateZ(0)", filter: "blur(2px)" }}
-      />
+      <div className="absolute inset-0">
+        <canvas
+          ref={canvasRef}
+          className="w-full h-full block absolute inset-0"
+          style={{ transform: "translateZ(0)", filter: "blur(6px)" }}
+        />
+
+        {/* Black-tinted overlay with subtle backdrop blur to darken and soften the background */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-none"
+          style={{ mixBlendMode: 'multiply' }}
+        />
+      </div>
     </div>
   );
 };
