@@ -1,44 +1,60 @@
 "use client";
 
 import React from "react";
-import GooeyText from "@/components/ui/gooey-text-morphing";
+import { GooeyText } from "@/components/ui/gooey-text-morphing";
 
 export default function FestInfo() {
   return (
-    <section className="bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.25),transparent_40%)] bg-opacity-40 py-16 md:py-28 relative">
-      <div className="container mx-auto px-6 md:px-12 text-center text-foreground">
+    <section className="relative w-full overflow-hidden bg-neutral-950 py-24 md:py-36 font-sans select-none">
 
-        {/* Wrapper (no background tint/blur) */}
-        <div className="mx-auto max-w-5xl rounded-3xl bg-transparent border border-white/5 p-8 md:p-16 shadow-2xl">
+      {/* --- Background: Minimalist Ambient Depth --- */}
+      {/* 1. Very faint grid (barely visible texture) */}
+      <div className="pointer-events-none absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.03]"></div>
 
-          {/* Animated gooey morphing text */}
-          <div className="leading-tight">
-            {/* Use GooeyText to cycle the three words */}
-            {/* textClassName will merge with internal sizing via `cn` */}
+      {/* 2. Soft, deep ambient glow (toned down) */}
+      <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 transform opacity-40">
+        <div className="h-[30rem] w-[30rem] rounded-full bg-red-900/20 blur-[100px]"></div>
+      </div>
+
+      <div className="container relative mx-auto px-6 z-10 md:px-12 text-center">
+
+        {/* --- Minimalist Wrapper --- */}
+        {/* Removed the heavy glass background. Just a whisper of a border. */}
+        <div className="mx-auto max-w-4xl p-4 md:p-12 relative">
+
+          {/* Animated Gooey Text */}
+          {/* STRATEGY: High contrast. 
+             The text is pure, vibrant red. The background is deep black.
+             No drop-shadows allows the "liquid" animation to be the main star.
+          */}
+          <div className="relative z-10 mb-8">
             <GooeyText
               texts={["Collaborate.", "Compete.", "Create."]}
               morphTime={1}
-              cooldownTime={0.5}
-              className="relative h-40 md:h-56"
-              textClassName="font-black tracking-tight text-4xl md:text-7xl text-cyan-200"
+              cooldownTime={1.5}
+              className="relative h-28 md:h-40"
+              textClassName="font-bold tracking-tighter text-5xl md:text-8xl text-red-600"
             />
           </div>
 
-          <p className="mt-8 text-sm md:text-base font-semibold text-cyan-100 opacity-90 tracking-wide uppercase">
-            TECHSOLSTICE '26 — The Flagship Tech & Innovation Fest of MIT Bengaluru
+          {/* Divider Line */}
+          <div className="w-16 h-1 bg-red-900/30 mx-auto rounded-full mb-8"></div>
+
+          {/* Sub-header: Clean white, no gradients */}
+          <p className="text-sm md:text-base font-medium tracking-[0.2em] uppercase text-neutral-400 mb-8">
+            TechSolstice '26 <span className="text-red-900 px-2">//</span> MIT Bengaluru
           </p>
 
-          <div className="mt-8 max-w-3xl mx-auto text-sm md:text-lg text-gray-300 leading-relaxed">
+          {/* Body Text: Muted gray for elegance. High readability. */}
+          <div className="max-w-2xl mx-auto text-sm md:text-lg text-neutral-500 leading-relaxed font-normal space-y-6">
             <p>
-              TechSolstice is a celebration of creativity, technology, and entrepreneurship.
-              We bring together the brightest minds from premier institutions across India to
-              [cite_start]bridge the gap between bold ideas and reality[cite: 17, 18].
+              A convergence of creativity, future tech, and entrepreneurship.
+              Bridging the gap between <span className="text-neutral-300">bold ideas</span> and reality.
             </p>
 
-            <p className="mt-6">
-              Organized entirely by students, TechSolstice '26 embodies the spirit of
-              innovation, precision, and passion. From the 36-Hour Hackathon and Battle Bots
-              [cite_start]to high-stakes Esports, this is your platform to ignite the future[cite: 19, 50, 107].
+            <p>
+              From the 36-Hour Hackathon to high-stakes Esports.
+              This is your platform to <span className="text-red-500/80">ignite the future</span>.
             </p>
           </div>
 

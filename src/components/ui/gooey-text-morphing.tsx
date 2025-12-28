@@ -28,12 +28,15 @@ export function GooeyText({
     let cooldown = cooldownTime;
 
     const setMorph = (fraction: number) => {
+      // Increased base blur from 8 to 12 for smoother gradient blending
       if (text1Ref.current && text2Ref.current) {
-        text2Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+        const blurAmount = Math.min(12 / fraction - 12, 100);
+        text2Ref.current.style.filter = `blur(${blurAmount}px)`;
         text2Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
 
         fraction = 1 - fraction;
-        text1Ref.current.style.filter = `blur(${Math.min(8 / fraction - 8, 100)}px)`;
+        const blurAmount2 = Math.min(12 / fraction - 12, 100);
+        text1Ref.current.style.filter = `blur(${blurAmount2}px)`;
         text1Ref.current.style.opacity = `${Math.pow(fraction, 0.4) * 100}%`;
       }
     };
@@ -93,9 +96,11 @@ export function GooeyText({
 
   return (
     <div className={cn("relative", className)}>
+      {/* The SVG filter that creates the gooey effect */}
       <svg className="absolute h-0 w-0" aria-hidden="true" focusable="false">
         <defs>
           <filter id="threshold">
+            {/* The feColorMatrix is what crunches the alpha channels together */}
             <feColorMatrix
               in="SourceGraphic"
               type="matrix"
@@ -107,20 +112,18 @@ export function GooeyText({
         </defs>
       </svg>
 
-      <div className="flex items-center justify-center" style={{ filter: "url(#threshold)" }}>
+      <div className="flex items-center justify-center w-full h-full" style={{ filter: "url(#threshold)" }}>
         <span
           ref={text1Ref}
           className={cn(
-            "absolute inline-block select-none text-center text-6xl md:text-[60pt]",
-            "text-foreground",
+            "absolute inline-block select-none text-center w-full",
             textClassName,
           )}
         />
         <span
           ref={text2Ref}
           className={cn(
-            "absolute inline-block select-none text-center text-6xl md:text-[60pt]",
-            "text-foreground",
+            "absolute inline-block select-none text-center w-full",
             textClassName,
           )}
         />
@@ -128,5 +131,3 @@ export function GooeyText({
     </div>
   );
 }
-
-export default GooeyText;
