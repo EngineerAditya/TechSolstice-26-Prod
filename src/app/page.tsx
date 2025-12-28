@@ -7,6 +7,7 @@ import ZoomParallax from "@/components/ui/zoom-parallax";
 import FestInfo from "@/components/ui/fest-info";
 import { LoadingScreen } from "../components/loading-screen";
 import { useState, useEffect } from "react";
+import Image from "next/image";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -56,6 +57,24 @@ export default function Home() {
         className={`w-full transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"
           }`}
       >
+        {/* Sticky Logo in Top Left */}
+        <div className="fixed top-4 left-4 z-50 flex items-center gap-3">
+          <Image
+            src="/logos/logo.png"
+            alt="TechSolstice Logo"
+            width={60}
+            height={60}
+            className="h-15 w-auto"
+          />
+          <Image
+            src="/logos/font-logo.png"
+            alt="TechSolstice Wordmark"
+            width={150}
+            height={45}
+            className="h-12 w-auto translate-y-0.5"
+          />
+        </div>
+
         {/* Hero section with robot */}
         <HeroRobot />
 

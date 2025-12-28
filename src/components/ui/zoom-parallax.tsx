@@ -234,16 +234,7 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 
         <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)', backgroundSize: '100px 100px' }} />
 
-        {/* Initial Hype */}
-        <motion.div style={{ opacity: hypeTextOpacity }} className="absolute inset-0 flex flex-col items-center justify-center z-5 pointer-events-none">
-          <p className="text-neutral-500 text-lg md:text-xl tracking-[0.3em] uppercase font-light text-center max-w-2xl px-4 mt-8">
-            Moments that defined us
-          </p>
-          <div className="absolute bottom-20 flex flex-col items-center gap-4 opacity-50">
-            <div className="w-[1px] h-12 bg-gradient-to-b from-transparent via-white to-transparent" />
-            <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">Scroll</span>
-          </div>
-        </motion.div>
+        
 
         {/* Images */}
         {images.map(({ src, alt }, index) => {
