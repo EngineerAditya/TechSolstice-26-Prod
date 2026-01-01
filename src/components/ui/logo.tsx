@@ -27,20 +27,20 @@ export function Logo({ variant = "header", className = "" }: LogoProps) {
   const content =
     variant === "stacked" ? (
       <div className={`flex flex-col items-center gap-3 ${className}`}>
-        <div className="relative h-16 w-16 sm:h-20 sm:w-20">
+        <div className="relative h-20 w-20 sm:h-24 sm:w-24">
           <Image src="/logos/SCLogo.png" alt="Student Council Logo" fill className="object-contain" priority />
         </div>
-        <div className="relative h-8 w-auto aspect-[3/1] sm:h-12">
+        <div className="relative h-10 w-auto aspect-[3/1] sm:h-14">
           <Image src="/logos/TechSolsticeLogo.png" alt="TechSolstice Wordmark" fill className="object-contain" priority />
         </div>
       </div>
     ) : (
       <div className={`flex items-center gap-3 ${className}`}>
-        <div className={`relative w-auto ${variant === "compact" ? "h-6 md:h-8" : "h-8 md:h-12"} aspect-[3/1]`}>
+        <div className={`relative w-auto ${variant === "compact" ? "h-8 md:h-10" : "h-10 md:h-14"} aspect-[3/1]`}>
           <Image src="/logos/TechSolsticeLogo.png" alt="TechSolstice Wordmark" fill className="object-contain object-left" priority />
         </div>
-        <div className="h-6 md:h-8 w-[1.5px] bg-white/30 rounded-full" />
-        <div className={`relative w-auto ${variant === "compact" ? "h-6 md:h-8 aspect-square" : "h-8 md:h-12 aspect-square"}`}>
+        <div className="h-8 md:h-10 w-[1.5px] bg-white/30 rounded-full" />
+        <div className={`relative w-auto ${variant === "compact" ? "h-8 md:h-10 aspect-square" : "h-10 md:h-14 aspect-square"}`}>
           <Image src="/logos/SCLogo.png" alt="Student Council Logo" fill className="object-contain" priority />
         </div>
       </div>

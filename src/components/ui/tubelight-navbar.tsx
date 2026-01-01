@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
+import { Menu, X } from "lucide-react";
 
 interface NavItem {
   name: string;
@@ -20,6 +21,7 @@ interface NavBarProps {
 
 export function NavBar({ items, className }: NavBarProps) {
   const [activeTab, setActiveTab] = useState(items[0]?.name ?? "");
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
@@ -28,6 +30,24 @@ export function NavBar({ items, className }: NavBarProps) {
     const match = items.find((it) => (it.url === "/" ? pathname === "/" : pathname.startsWith(it.url)));
     if (match) setActiveTab(match.name);
   }, [pathname, items]);
+
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
+  const handleNavClick = (item: NavItem, e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push(item.url, { scroll: false });
+    setActiveTab(item.name);
+    setMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -39,7 +59,8 @@ export function NavBar({ items, className }: NavBarProps) {
         }}
       />
 
-      <div className={cn("fixed top-4 left-1/2 -translate-x-1/2 z-[101] transition-all duration-300", className)}>
+      {/* Desktop Navigation */}
+      <div className={cn("hidden md:flex fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-[101] transition-all duration-300", className)}>
         <div
           className="flex items-center gap-3 bg-black/20 border border-white/10 backdrop-blur-xl py-1 px-4 rounded-full shadow-lg shadow-black/20"
           style={{
@@ -57,21 +78,14 @@ export function NavBar({ items, className }: NavBarProps) {
                 key={item.name}
                 href={item.url}
                 prefetch={false}
-                onClick={(e: any) => {
-                  e.preventDefault();
-                  router.push(item.url, { scroll: false });
-                  setActiveTab(item.name);
-                }}
+                onClick={(e: any) => handleNavClick(item, e)}
                 className={cn(
                   "relative cursor-pointer text-sm font-semibold px-4 py-2 rounded-full transition-colors",
                   "text-neutral-300 hover:text-white",
                   isActive && "text-white",
                 )}
               >
-                <span className="hidden md:inline relative z-10">{item.name}</span>
-                <span className="md:hidden relative z-10">
-                  <Icon size={18} strokeWidth={2.5} />
-                </span>
+                <span className="relative z-10">{item.name}</span>
 
                 {isActive && (
                   <motion.div
@@ -93,6 +107,76 @@ export function NavBar({ items, className }: NavBarProps) {
           })}
         </div>
       </div>
+
+      {/* Mobile Hamburger Button */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="md:hidden fixed top-4 right-4 z-[102] p-3 bg-black/30 border border-white/10 backdrop-blur-xl rounded-full shadow-lg transition-all duration-300 hover:bg-black/40"
+        aria-label="Toggle menu"
+      >
+        {mobileMenuOpen ? (
+          <X className="w-5 h-5 text-white" strokeWidth={2.5} />
+        ) : (
+          <Menu className="w-5 h-5 text-white" strokeWidth={2.5} />
+        )}
+      </button>
+
+      {/* Mobile Full-Screen Menu */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="md:hidden fixed inset-0 z-[101]"
+            style={{
+              background: "linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(20,20,20,0.3) 50%, rgba(0,0,0,0.4) 100%)",
+              WebkitBackdropFilter: "blur(40px) saturate(180%)",
+              backdropFilter: "blur(40px) saturate(180%)",
+              boxShadow: "inset 0 0 200px rgba(255,255,255,0.03)",
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 pointer-events-none" />
+            <div className="absolute inset-0 border border-white/10 pointer-events-none" />
+            <motion.div
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -20, opacity: 0 }}
+              transition={{ duration: 0.3, delay: 0.1 }}
+              className="flex flex-col items-center justify-center h-full gap-8 px-8 relative z-10"
+            >
+              {items.map((item, index) => {
+                const Icon = item.icon;
+                const isActive = activeTab === item.name;
+
+                return (
+                  <motion.div
+                    key={item.name}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 20, opacity: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
+                  >
+                    <Link
+                      href={item.url}
+                      prefetch={false}
+                      onClick={(e: any) => handleNavClick(item, e)}
+                      className={cn(
+                        "flex items-center gap-4 text-3xl font-semibold transition-all duration-300",
+                        isActive ? "text-white scale-110" : "text-neutral-400 hover:text-white hover:scale-105"
+                      )}
+                    >
+                      <Icon className="w-8 h-8" strokeWidth={2.5} />
+                      <span>{item.name}</span>
+                    </Link>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </>
   );
 }

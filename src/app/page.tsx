@@ -64,13 +64,11 @@ export default function Home() {
 
         {/* Video Section - Desktop Only */}
         {!isMobile && (
-          <div className="mt-12 md:mt-20 lg:mt-28">
-            <ScrollExpansionVideo
-              mediaSrc="/videos/logo-reveal.mp4"
-              title="TechSolstice'26 — Reveal"
-              scrollToExpand="Scroll to expand"
-            />
-          </div>
+          <ScrollExpansionVideo
+            mediaSrc="/videos/logo-reveal.mp4"
+            title="TechSolstice'26 — Reveal"
+            scrollToExpand="Scroll to expand"
+          />
         )}
 
         {/* Fest information */}
