@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import Logo from "@/components/ui/logo";
 import { motion } from "framer-motion";
 
 interface LoadingScreenProps {
@@ -85,23 +85,9 @@ export function LoadingScreen({ onLoadingComplete, minDuration = 2000 }: Loading
       <div className="absolute inset-0 bg-[linear-gradient(rgba(18,18,18,0)_1px,transparent_1px),linear-gradient(90deg,rgba(18,18,18,0)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center">
-        {/* Logo Image */}
-        <div className="relative mb-6 h-20 w-20 sm:h-24 sm:w-24">
-          <Image
-            src="/logos/logo.png"
-            alt="TechSolstice Logo"
-            fill
-            className="object-contain drop-shadow-[0_0_15px_rgba(220,38,38,0.5)]"
-            priority
-          />
-        </div>
+        <Logo variant="stacked" />
 
-        {/* Text Logo */}
-        <h1 className="font-logo text-4xl sm:text-6xl font-bold tracking-wider text-white uppercase mb-2 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-          TECH<span className="text-red-600">SOLSTICE</span>
-        </h1>
-
-        <p className="font-mono text-red-500/80 text-xs tracking-[0.3em] animate-pulse">
+        <p className="font-mono text-red-500/80 text-xs tracking-[0.3em] animate-pulse mt-3">
           SYSTEM_INITIALIZING...
         </p>
 

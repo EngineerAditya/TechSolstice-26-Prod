@@ -8,22 +8,20 @@ import FestInfo from "@/components/ui/fest-info";
 import { LoadingScreen } from "../components/loading-screen";
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Logo from "@/components/ui/logo";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
-  const [isMobile, setIsMobile] = useState(true); // Default to true (safe mobile-first)
+  const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {
-    // Check screen size on mount
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile(); // Check immediately
+    checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Smooth scrolling using Lenis for nicer parallax experience
   useEffect(() => {
-    // Dynamically import to avoid SSR issues
     let rafId: number;
     (async () => {
       try {
@@ -37,8 +35,7 @@ export default function Home() {
 
         rafId = requestAnimationFrame(raf);
       } catch (e) {
-        // lenis not installed or failed to load — fail gracefully
-        // console.warn('Lenis not loaded', e);
+        // lenis optional
       }
     })();
 
@@ -57,28 +54,15 @@ export default function Home() {
         className={`w-full transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"
           }`}
       >
-        {/* Sticky Logo in Top Left */}
-        <div className="fixed md:top-4 md:left-4 top-[15px] left-[11.5px] z-50 flex items-center gap-3">
-          <Image
-            src="/logos/logo.png"
-            alt="TechSolstice Logo"
-            width={60}
-            height={60}
-            className="h-15 w-auto md:h-15 h-12"
-          />
-          <Image
-            src="/logos/font-logo.png"
-            alt="TechSolstice Wordmark"
-            width={150}
-            height={45}
-            className="h-12 w-auto translate-y-0.5 hidden md:block"
-          />
+        {/* --- FIXED LOGO HEADER --- */}
+        <div className="fixed top-4 left-4 md:top-6 md:left-8 z-50">
+          <Logo />
         </div>
 
-        {/* Hero section with robot */}
+        {/* Hero section */}
         <HeroRobot />
 
-        {/* Video Section - ONLY RENDER ON DESKTOP/TABLET */}
+        {/* Video Section - Desktop Only */}
         {!isMobile && (
           <div className="mt-12 md:mt-20 lg:mt-28">
             <ScrollExpansionVideo
@@ -89,7 +73,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* Fest information (placed after video, before parallax) */}
+        {/* Fest information */}
         <div className="mt-12">
           <FestInfo />
         </div>
@@ -99,7 +83,7 @@ export default function Home() {
           <ScrollPathAnimation />
         </div>
 
-        {/* Zoom parallax demo (integrates client component) */}
+        {/* Zoom parallax */}
         <div className="mt-8">
           <ZoomParallax
             images={[

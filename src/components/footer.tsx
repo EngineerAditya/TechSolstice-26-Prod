@@ -3,6 +3,7 @@
 import { Mail, Phone } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
+import Logo from "@/components/ui/logo";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useEffect, useRef, useState } from "react";
 
@@ -60,21 +61,8 @@ export const Footer = () => {
           {/* Logos Section - Mobile */}
           <div className="space-y-6">
             {/* Horizontal Logos */}
-            <div className="flex items-center justify-center gap-4">
-              <Image
-                src="/logos/logo.png"
-                alt="TechSolstice Logo"
-                width={80}
-                height={80}
-                className="h-20 w-auto"
-              />
-              <Image
-                src="/logos/font-logo.png"
-                alt="TechSolstice Wordmark"
-                width={200}
-                height={60}
-                className="h-18 w-auto translate-y-1"
-              />
+            <div className="flex items-center justify-center">
+              <Logo variant="compact" />
             </div>
 
             {/* Address below logos */}
@@ -130,20 +118,7 @@ export const Footer = () => {
               <div className="space-y-5 lg:space-y-6">
                 {/* Horizontal Logos */}
                 <div className="flex items-center gap-3 lg:gap-4 -ml-2">
-                  <Image
-                    src="/logos/logo.png"
-                    alt="TechSolstice Logo"
-                    width={isDesktop ? 100 : 80}
-                    height={isDesktop ? 100 : 80}
-                    className={`${isDesktop ? 'h-24' : 'h-20'} w-auto`}
-                  />
-                  <Image
-                    src="/logos/font-logo.png"
-                    alt="TechSolstice Wordmark"
-                    width={isDesktop ? 200 : 180}
-                    height={isDesktop ? 60 : 54}
-                    className={`${isDesktop ? 'h-18' : 'h-16'} w-auto translate-y-1`}
-                  />
+                  <Logo variant="compact" />
                 </div>
 
                 {/* Address */}
