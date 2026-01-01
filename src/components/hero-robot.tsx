@@ -3,6 +3,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { PatternText } from "@/components/ui/pattern-text";
 
 const SplineScene = dynamic(() => import("./ui/spline-scene").then((m) => m.SplineScene), { ssr: false });
 
@@ -80,19 +81,18 @@ export function HeroRobot() {
 
       {/* Centered Text Overlay - Above Spline scene */}
       <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-2 sm:px-4 md:px-6 lg:px-8">
-        <h1
+        <div
           ref={titleRef}
-          className="michroma-regular font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-50 to-neutral-400 text-center w-full max-w-full leading-tight overflow-hidden drop-shadow-2xl whitespace-nowrap"
+          className="text-center w-full max-w-full overflow-visible relative"
           style={{
             fontSize: `${fontSize}px`,
-            fontOpticalSizing: "auto",
-            fontVariationSettings: '"ROND" 0',
-            whiteSpace: "nowrap",
-            overflowWrap: "normal",
           }}
         >
-          TechSolstice'26
-        </h1>
+          <PatternText
+            text="TechSolstice'26"
+            className="michroma-regular !text-[1em] !text-white/90 drop-shadow-2xl whitespace-nowrap"
+          />
+        </div>
       </div>
     </section>
   );
