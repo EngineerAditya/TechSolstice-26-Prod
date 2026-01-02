@@ -2,7 +2,8 @@ import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
 import { createServerClient } from '@supabase/ssr'
 
-export async function middleware(request: NextRequest) {
+// CHANGED: Renamed from 'middleware' to 'proxy' to match your filename/error requirement
+export async function proxy(request: NextRequest) {
   // 1. PERFORMANCE: Refresh session
   const response = await updateSession(request)
 
