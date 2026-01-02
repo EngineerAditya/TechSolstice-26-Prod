@@ -3,89 +3,157 @@
 import { useState } from "react";
 import ExpandableCard from "@/components/ui/expandable-card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Trophy } from "lucide-react"; // Added Trophy
-import Teamregform from "./ui/Teamregform";
+import { Calendar, Clock, MapPin, Trophy, CheckCircle2, Lock, Hourglass } from "lucide-react";
+import TeamRegistrationForm from "@/components/ui/TeamRegistrationForm";
+import TeamDashboard from "@/components/ui/TeamDashboard";
 
 export type Event = {
   id: string;
   name: string;
-  shortDescription: string;
-  longDescription: string;
+  shortDescription: string | null;
+  longDescription: string | null;
   category: string;
-  date: string;
-  time: string;
-  venue: string;
-  imageUrl: string;
-  prize_pool: string;
+  starts_at: string | null;
+  ends_at: string | null;
+  venue: string | null;
+  imageUrl: string | null;
+  prize_pool: string | null;
+  min_team_size: number;
+  max_team_size: number;
+  // Control Fields
+  is_reg_open: boolean;
+  registration_starts_at: string | null;
 };
 
-export function EventCard({ event }: { event: Event }) {
+interface EventCardProps {
+  event: Event;
+  isRegistered?: boolean;
+}
+
+export function EventCard({ event, isRegistered = false }: EventCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
 
-  const currentUserId = "CURRENT_USER_ID";
-  const currentUserName = "Your Name";
+  // --- STATE LOGIC ---
+  const now = new Date();
+  const regStart = event.registration_starts_at ? new Date(event.registration_starts_at) : new Date(0);
+  const isComingSoon = now < regStart;
+  const isLocked = !event.is_reg_open;
+
+  const eventDate = event.starts_at
+    ? new Date(event.starts_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
+    : "TBA";
+  const eventTime = event.starts_at
+    ? new Date(event.starts_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    : "TBA";
+
+  // --- BUTTON TEXT LOGIC ---
+  let buttonText = "Register Now";
+  let buttonIcon = null;
+  let isDisabled = false;
+
+  if (isRegistered) {
+    buttonText = isLocked ? "View Team (Locked)" : "Manage Team";
+  } else {
+    if (isComingSoon) {
+      buttonText = "Coming Soon";
+      buttonIcon = <Hourglass size={16} className="mr-2" />;
+      isDisabled = true;
+    } else if (isLocked) {
+      buttonText = "Registration Closed";
+      buttonIcon = <Lock size={16} className="mr-2" />;
+      isDisabled = true;
+    }
+  }
 
   return (
     <ExpandableCard
       title={event.name}
-      src={event.imageUrl}
-      description={event.shortDescription}
+      src={event.imageUrl || "/placeholder.jpg"}
+      description={event.shortDescription || ""}
       isFlipped={isFlipped}
       backContent={
-        <Teamregform
-          eventId={event.id}
-          captainId={currentUserId}
-          captainName={currentUserName}
-          minSize={1}
-          maxSize={5}
-          useEmails={true}
-          onBack={() => setIsFlipped(false)}
-          onSuccess={() => {
-            setIsFlipped(false);
-          }}
-        />
+        isRegistered ? (
+          <TeamDashboard
+            eventId={event.id}
+            eventName={event.name}
+            minSize={event.min_team_size}
+            maxSize={event.max_team_size}
+            isLocked={isLocked}
+            onBack={() => setIsFlipped(false)}
+          />
+        ) : (
+          <TeamRegistrationForm
+            eventId={event.id}
+            eventName={event.name}
+            minSize={event.min_team_size}
+            maxSize={event.max_team_size}
+            onBack={() => setIsFlipped(false)}
+            onSuccess={() => setIsFlipped(false)}
+          />
+        )
       }
     >
-      {/* FRONT content of overlay */}
       <div className="space-y-6 pt-2 w-full">
-        <p className="text-neutral-300 leading-relaxed">{event.longDescription}</p>
+        <p className="text-neutral-300 leading-relaxed line-clamp-4">
+          {event.longDescription}
+        </p>
 
-        {/* Prize Section */}
-        <div className="flex items-center justify-center gap-2 w-40 h-10 px-2 py-2 border-3 outline-2 outline-[#C9A227] border-black bg-linear-to-r from-[#FF9500] via-[#FFCC00] to-[#FFCC00] rounded-2xl">
-          <span className="text-base font-bold text-white">
-            <Trophy size={17} className="text-white shrink-0 inline-flex" /> Prize
-          </span>
-          <span className="text-base font-bold text-white">₹{event.prize_pool}</span>
+        {/* STATUS BADGES */}
+        <div className="flex flex-wrap gap-2 justify-center">
+          {isRegistered && (
+            <div className="flex items-center gap-2 bg-green-500/10 border border-green-500/20 p-2 rounded-lg">
+              <CheckCircle2 className="text-green-500" size={16} />
+              <span className="text-green-400 font-bold text-sm">Registered</span>
+            </div>
+          )}
+          {isLocked && !isRegistered && !isComingSoon && (
+            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 p-2 rounded-lg">
+              <Lock className="text-red-500" size={16} />
+              <span className="text-red-400 font-bold text-sm">Closed</span>
+            </div>
+          )}
         </div>
 
-        {/* Details Grid */}
+        {event.prize_pool && (
+          <div className="flex items-center justify-center gap-2 w-fit mx-auto px-4 py-2 border-2 border-[#C9A227] bg-gradient-to-r from-[#FF9500] via-[#FFCC00] to-[#FFCC00] rounded-2xl shadow-lg">
+            <Trophy size={17} className="text-white shrink-0" />
+            <span className="text-base font-bold text-black drop-shadow-sm">Prize: ₹{event.prize_pool}</span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-          <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
             <Calendar size={18} className="text-cyan-400 shrink-0" />
-            <span className="text-sm">{event.date}</span>
+            <span className="text-sm text-neutral-200">{eventDate}</span>
           </div>
-          <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
             <Clock size={18} className="text-cyan-400 shrink-0" />
-            <span className="text-sm">{event.time}</span>
+            <span className="text-sm text-neutral-200">{eventTime}</span>
           </div>
-          <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg">
+          <div className="flex items-center gap-2 p-3 bg-white/5 rounded-lg border border-white/10">
             <MapPin size={18} className="text-cyan-400 shrink-0" />
-            <span className="text-sm">{event.venue}</span>
+            <span className="text-sm text-neutral-200 truncate" title={event.venue || "TBA"}>
+              {event.venue || "TBA"}
+            </span>
           </div>
         </div>
 
         <div className="w-full flex items-center justify-center pt-4">
           <Button
-            onClick={() => setIsFlipped(true)}
+            onClick={() => !isDisabled && setIsFlipped(true)}
             size="lg"
-            className="bg-cyan-500 hover:bg-cyan-600 text-black font-bold px-12"
+            disabled={isDisabled}
+            variant={isRegistered ? "outline" : "default"}
+            className={`font-bold px-12 w-full md:w-auto transition-all active:scale-95 disabled:opacity-70 disabled:pointer-events-none ${isRegistered
+              ? "border-green-500/50 text-green-400 hover:bg-green-500/10"
+              : "bg-cyan-500 hover:bg-cyan-600 text-black"
+              }`}
           >
-            Register Now
+            {buttonIcon}
+            {buttonText}
           </Button>
         </div>
       </div>
     </ExpandableCard>
   );
 }
-
-export default EventCard;
