@@ -6,12 +6,18 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient()
 
   // Sign out from Supabase
-  await supabase.auth.signOut()
+  await supabase.auth.signOut({ scope: 'global' })
 
   // Revalidate the home page so it shows "Login" instead of "Dashboard"
   revalidatePath('/', 'layout')
 
-  return NextResponse.redirect(new URL('/', req.url), {
+  const response = NextResponse.redirect(new URL('/', req.url), {
     status: 302,
   })
+
+  // Clear all auth cookies
+  response.cookies.delete('sb-access-token')
+  response.cookies.delete('sb-refresh-token')
+
+  return response
 }

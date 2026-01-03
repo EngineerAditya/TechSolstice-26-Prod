@@ -65,18 +65,7 @@ export async function GET(request: Request) {
           return NextResponse.redirect(`${origin}/complete-profile`)
         }
 
-        // 6. Admin Check (Only if profile is complete)
-        const { data: admin } = await supabase
-          .from('admins')
-          .select('id')
-          .eq('id', user.id)
-          .single()
-
-        if (admin) {
-          return NextResponse.redirect(`${origin}/admin-dashboard`)
-        }
-
-        // 7. Success -> Go to Profile
+        // 6. Success -> Go to Profile (admins can navigate to dashboard from there)
         return NextResponse.redirect(`${origin}/profile`)
       }
     }

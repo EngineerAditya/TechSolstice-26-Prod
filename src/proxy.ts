@@ -52,9 +52,9 @@ export async function proxy(request: NextRequest) {
     }
 
     // B. ALREADY COMPLETE CHECK
-    // If they ARE complete but try to visit Onboarding -> Send to Passes
+    // If they ARE complete but try to visit Onboarding -> Send to Home
     if (!isProfileIncomplete && isOnboarding) {
-      return NextResponse.redirect(new URL('/passes', request.url))
+      return NextResponse.redirect(new URL('/home', request.url))
     }
 
     // C. ADMIN SECURITY
@@ -72,8 +72,8 @@ export async function proxy(request: NextRequest) {
 
     // D. LOGIN REDIRECT
     if (isLoginPage) {
-      // If profile incomplete, Gate A will catch them later. If complete, go to Passes.
-      return NextResponse.redirect(new URL('/passes', request.url))
+      // If profile incomplete, Gate A will catch them later. If complete, go to Profile.
+      return NextResponse.redirect(new URL('/profile', request.url))
     }
   }
 

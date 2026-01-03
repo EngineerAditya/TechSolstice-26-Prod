@@ -15,6 +15,9 @@ export default function LoginPage() {
       provider: provider,
       options: {
         redirectTo: `${location.origin}/api/auth/callback`,
+        queryParams: provider === 'google'
+          ? { prompt: 'select_account' }
+          : { prompt: 'select_account' }
       },
     })
 
