@@ -10,36 +10,6 @@ import { LoadingScreen } from "../components/loading-screen";
 import Logo from "@/components/ui/logo";
 import { SponsorsSection } from "@/components/sponsors-section";
 
-// --- CUSTOM TIMELINE DATA ---
-// You can edit this array to change the scroll path content automatically.
-const timelineData = [
-  {
-    title: "Opening Ceremony",
-    description: "The grand reveal of TechSolstice '26. Keynote speakers and theme unveiling.",
-    align: "center" as const
-  },
-  {
-    title: "Hackathon Kickoff",
-    description: "48-hour sleepless coding marathon begins. Teams lock in to build the future.",
-    align: "left" as const
-  },
-  {
-    title: "RoboWars Arena",
-    description: "Sparks fly as custom-built bots battle for supremacy in the main pit.",
-    align: "right" as const
-  },
-  {
-    title: "Gaming Finals",
-    description: "The top Valorant and FIFA players face off on the big screen.",
-    align: "left" as const
-  },
-  {
-    title: "Star Night",
-    description: "A musical extravaganza to close the fest with high energy and vibes.",
-    align: "center" as const
-  },
-];
-
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
@@ -93,10 +63,10 @@ export default function Home() {
           <FestInfo />
         </div>
 
-        {/* 4. SCROLL PATH ANIMATION (Timeline) */}
-        {/* We pass the data here to make it dynamic */}
+        {/* 4. SCROLL PATH ANIMATION (Categories) */}
         <div className="mt-8">
-          <ScrollPathAnimation items={timelineData} />
+          {/* FIX: Removed 'items={timelineData}' because the component now has the data built-in */}
+          <ScrollPathAnimation />
         </div>
 
         {/* 5. ZOOM PARALLAX GALLERY */}
