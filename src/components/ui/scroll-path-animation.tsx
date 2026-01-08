@@ -4,119 +4,193 @@ import { useEffect, useRef } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
+import Link from 'next/link';
 import styles from './scroll-path-animation.module.css';
 
-// Register GSAP plugins
 gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
 
+// --- DATA CONFIGURATION ---
+type Zone = {
+  title: string;
+  description: string;
+};
+
+const zones: Zone[] = [
+  {
+    title: "Coding & Dev",
+    description: "Hackathons and competitive coding battles. Prove your logic dominates the syntax.",
+  },
+  {
+    title: "Robotics & Hardware",
+    description: "Drone racing, line followers, and combat bots. Witness metal clash and circuits spark.",
+  },
+  {
+    title: "Finance & Strategy",
+    description: "Master the markets. Where high stakes meet sharp business acumen and strategy.",
+  },
+  {
+    title: "Quizzes & Tech Games",
+    description: "Test your trivia. It’s not just what you know, but how fast you can recall it.",
+  },
+  {
+    title: "Creative & Design",
+    description: "UI/UX face-offs and digital art. Where aesthetics meet functionality.",
+  },
+  {
+    title: "Innovation & Ideation",
+    description: "Startup prototypes and research. The launchpad for the next big disruption.",
+  },
+  {
+    title: "Gaming Zone",
+    description: "Valorant, FIFA, and Tekken tournaments for ultimate bragging rights.",
+  },
+  {
+    title: "Other Events",
+    description: "Treasure hunts, fun stalls, and informal events. Because a fest is nothing without vibes.",
+  }
+];
+
 export function ScrollPathAnimation() {
-  const mainRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const markerRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const finalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let ctx: gsap.Context;
 
-    const createTimeline = () => {
-      ctx && ctx.revert();
+    const initAnimation = () => {
+      if (ctx) ctx.revert();
 
       ctx = gsap.context(() => {
         const box = boxRef.current;
-        if (!box) return;
+        const container = containerRef.current;
+        const markers = markerRefs.current.filter(Boolean);
 
-        const boxStartRect = box.getBoundingClientRect();
+        if (!box || !container || markers.length === 0) return;
 
-        // All marker elements
-        const markers = markerRefs.current.filter(Boolean) as HTMLElement[];
+        const containerRect = container.getBoundingClientRect();
 
-        // Grab the points to animate between
-        const points = markers.map((marker) => {
-          const r = marker.getBoundingClientRect();
-
-          return {
-            x: r.left + r.width / 2 - (boxStartRect.left + boxStartRect.width / 2),
-            y: r.top + r.height / 2 - (boxStartRect.top + boxStartRect.height / 2)
-          };
+        // 1. Build Path Data relative to container
+        const pathPoints = markers.map((marker) => {
+          const rect = marker.getBoundingClientRect();
+          const x = (rect.left - containerRect.left) + (rect.width / 2) - (box.offsetWidth / 2);
+          const y = (rect.top - containerRect.top) + (rect.height / 2) - (box.offsetHeight / 2);
+          return { x, y };
         });
 
+        // 2. Set Initial Position (Start at the first point)
+        if (pathPoints.length > 0) {
+          gsap.set(box, { x: pathPoints[0].x, y: pathPoints[0].y });
+        }
+
+        // 3. Create Timeline
         const tl = gsap.timeline({
           scrollTrigger: {
-            trigger: box.parentElement,
-            start: 'top center',
-            endTrigger: finalRef.current,
-            end: 'top center',
-            scrub: 1
+            trigger: container,
+            // START: When the top of the container hits the CENTER of the viewport
+            start: "top center",
+            // END: When the bottom of the container hits the CENTER of the viewport
+            // This ensures the diamond stays strictly in the visual center!
+            end: "bottom center",
+            scrub: 0.5, // Lower scrub for snappier response to scroll direction changes
           }
         });
 
         tl.to(box, {
-          duration: 1,
-          ease: 'none',
           motionPath: {
-            path: points,
-            curviness: 1.5
-          }
+            path: pathPoints,
+            curviness: 1.2,
+            autoRotate: false,
+            alignOrigin: [0.5, 0.5],
+          },
+          ease: "none",
         });
-      }, mainRef);
+
+      }, containerRef);
     };
 
-    // Delay to ensure DOM is ready
-    const timer = setTimeout(createTimeline, 100);
-
-    const handleResize = () => createTimeline();
-    window.addEventListener('resize', handleResize);
+    const timer = setTimeout(initAnimation, 200);
+    window.addEventListener('resize', initAnimation);
 
     return () => {
       clearTimeout(timer);
-      window.removeEventListener('resize', handleResize);
-      ctx && ctx.revert();
+      window.removeEventListener('resize', initAnimation);
+      if (ctx) ctx.revert();
     };
   }, []);
 
+  // SPACING: 45vh per item
+  const totalHeight = zones.length * 45;
+
   return (
-    <>
-      <div className={styles.spacer}>
-        {/* --- ENGAGEMENT TEXT START --- */}
-        <div className="flex flex-col items-center justify-center h-full text-center px-4 select-none">
-          <h3 className="text-xl md:text-3xl font-bold text-white tracking-tight mb-3 drop-shadow-lg">
-            See you at the fest?
-          </h3>
-          <p className="text-red-500 font-mono text-[10px] md:text-xs uppercase tracking-widest animate-pulse">
-            (Who are we kidding. We know you're coming.)
-          </p>
+    <div className={styles.mainWrapper}>
 
-          {/* Visual Arrow Cue */}
-          <div className="mt-8 opacity-60">
-            <div className="w-[1px] h-16 bg-gradient-to-b from-red-600 via-red-900 to-transparent mx-auto"></div>
-          </div>
-        </div>
-        {/* --- ENGAGEMENT TEXT END --- */}
+      {/* Intro */}
+      <div className={styles.introSpacer}>
+        <h3 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight">
+          Explore Categories
+        </h3>
+        <p className="text-red-500 font-mono text-xs uppercase tracking-[0.2em] animate-pulse">
+          Scroll to navigate
+        </p>
+        <div className="w-[1px] h-16 bg-gradient-to-b from-red-600 via-red-900 to-transparent mx-auto mt-8" />
       </div>
 
-      <div ref={mainRef} className={styles.main}>
-        <div className={`${styles.container} ${styles.initial}`}>
-          <div ref={boxRef} className={styles.box}></div>
-        </div>
+      <div
+        ref={containerRef}
+        className={styles.pathContainer}
+        style={{ height: `${totalHeight}vh` }}
+      >
+        {/* The Moving Object */}
+        <div ref={boxRef} className={styles.box}></div>
 
-        <div className={`${styles.container} ${styles.second}`}>
-          <div ref={(el) => { markerRefs.current[0] = el }} className={styles.marker}></div>
-        </div>
-        <div className={`${styles.container} ${styles.third}`}>
-          <div ref={(el) => { markerRefs.current[1] = el }} className={styles.marker}></div>
-        </div>
-        <div className={`${styles.container} ${styles.fourth}`}>
-          <div ref={(el) => { markerRefs.current[2] = el }} className={styles.marker}></div>
-        </div>
-        <div className={`${styles.container} ${styles.fifth}`}>
-          <div ref={(el) => { markerRefs.current[3] = el }} className={styles.marker}></div>
-        </div>
-        <div className={`${styles.container} ${styles.sixth}`}>
-          <div ref={(el) => { markerRefs.current[4] = el }} className={styles.marker}></div>
-        </div>
+        {zones.map((zone, index) => {
+          const isRight = index % 2 === 0;
+
+          // Distribution Logic:
+          const topPos = (index / (zones.length - 1)) * 100;
+
+          // Number Formatting (01, 02...)
+          const indexStr = (index + 1).toString().padStart(2, '0');
+
+          return (
+            <div
+              key={index}
+              className={`${styles.stepContainer} ${isRight ? styles.alignRight : styles.alignLeft}`}
+              style={{ top: `${topPos}%` }}
+            >
+              {/* TEXT CARD */}
+              <div className={styles.textCard}>
+                <h4 className={styles.categoryTitle}>{zone.title}</h4>
+                <p className={styles.categoryDesc}>{zone.description}</p>
+                <Link href="/events" className={styles.ctaLink}>
+                  Explore &rarr;
+                </Link>
+              </div>
+
+              {/* MARKER (Target for Diamond) */}
+              <div
+                ref={(el) => { markerRefs.current[index] = el }}
+                className={styles.marker}
+              >
+                {indexStr}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
-      <div ref={finalRef} className={styles.spacer}></div>
-    </>
+      {/* Final Spacer */}
+      <div className={styles.introSpacer}>
+        <h2 className="text-3xl font-bold text-white mb-6">Ready to Compete?</h2>
+        <Link
+          href="/events"
+          className="px-10 py-4 bg-red-600 text-white font-bold rounded-full hover:bg-red-700 transition-all hover:scale-105 shadow-[0_0_20px_rgba(220,38,38,0.5)]"
+        >
+          View All Events
+        </Link>
+      </div>
+
+    </div>
   );
 }

@@ -2,17 +2,43 @@
 
 import { useState, useEffect } from "react";
 import { HeroRobot } from "../components/hero-robot";
-
-// --- CHANGE THIS IMPORT ---
 import YouTubeScrollVideo from "@/components/ui/youtube-scroll-video";
-// --------------------------
-
 import { ScrollPathAnimation } from "@/components/ui/scroll-path-animation";
 import ZoomParallax from "@/components/ui/zoom-parallax";
 import FestInfo from "@/components/ui/fest-info";
 import { LoadingScreen } from "../components/loading-screen";
 import Logo from "@/components/ui/logo";
 import { SponsorsSection } from "@/components/sponsors-section";
+
+// --- CUSTOM TIMELINE DATA ---
+// You can edit this array to change the scroll path content automatically.
+const timelineData = [
+  {
+    title: "Opening Ceremony",
+    description: "The grand reveal of TechSolstice '26. Keynote speakers and theme unveiling.",
+    align: "center" as const
+  },
+  {
+    title: "Hackathon Kickoff",
+    description: "48-hour sleepless coding marathon begins. Teams lock in to build the future.",
+    align: "left" as const
+  },
+  {
+    title: "RoboWars Arena",
+    description: "Sparks fly as custom-built bots battle for supremacy in the main pit.",
+    align: "right" as const
+  },
+  {
+    title: "Gaming Finals",
+    description: "The top Valorant and FIFA players face off on the big screen.",
+    align: "left" as const
+  },
+  {
+    title: "Star Night",
+    description: "A musical extravaganza to close the fest with high energy and vibes.",
+    align: "center" as const
+  },
+];
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
@@ -47,29 +73,33 @@ export default function Home() {
         className={`w-full transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"
           }`}
       >
+        {/* --- FIXED LOGO HEADER --- */}
         <div className="fixed top-4 left-4 md:top-6 md:left-8 z-50">
           <Logo />
         </div>
 
+        {/* 1. HERO SECTION */}
         <HeroRobot />
 
-        {/* --- USE THE NEW YOUTUBE COMPONENT HERE --- */}
-        {/* Replace 'comtgOhuXIg' with your actual YouTube Video ID */}
+        {/* 2. REVEAL VIDEO (YouTube) */}
         <YouTubeScrollVideo
           videoId="comtgOhuXIg"
           title="TechSolstice'26"
           scrollToExpand="Initiate Sequence"
         />
-        {/* ------------------------------------------ */}
 
+        {/* 3. FEST INFO */}
         <div className="relative z-10 mt-0 md:-mt-1 bg-black">
           <FestInfo />
         </div>
 
+        {/* 4. SCROLL PATH ANIMATION (Timeline) */}
+        {/* We pass the data here to make it dynamic */}
         <div className="mt-8">
-          <ScrollPathAnimation />
+          <ScrollPathAnimation items={timelineData} />
         </div>
 
+        {/* 5. ZOOM PARALLAX GALLERY */}
         <div className="mt-12">
           <ZoomParallax
             images={[
@@ -84,6 +114,7 @@ export default function Home() {
           />
         </div>
 
+        {/* 6. SPONSORS */}
         <div className="mt-16 pb-20">
           <SponsorsSection />
         </div>

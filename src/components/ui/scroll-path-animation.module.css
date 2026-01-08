@@ -1,17 +1,12 @@
-.spacer {
-  height: 20vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: white;
-}
+/* scroll-path-animation.module.css */
 
-.main {
+.mainWrapper {
   position: relative;
-  height: 300vh;
+  width: 100%;
+  overflow: hidden;
   background: black;
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 2px,
-      transparent 2px),
+  /* Grid Background */
+  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 2px, transparent 2px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.05) 2px, transparent 2px),
     linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
@@ -19,62 +14,188 @@
   background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
 }
 
-.container {
-  position: absolute;
-  width: 140px;
-  height: 140px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 10px;
+.introSpacer {
+  height: 40vh;
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  color: white;
+  text-align: center;
+  padding: 0 1rem;
 }
 
-.initial {
-  left: 60%;
-  top: 5%;
+.pathContainer {
+  position: relative;
+  width: 100%;
+  /* CHANGED: Increased width to allow wider travel on desktop */
+  max-width: 1400px;
+  margin: 0 auto;
+  /* Added padding to prevent touching edges on smaller laptops */
+  padding: 0 2rem;
 }
 
-.second {
-  left: 10%;
-  top: 25%;
-}
-
-.third {
-  right: 10%;
-  top: 45%;
-}
-
-.fourth {
-  left: 20%;
-  top: 65%;
-}
-
-.fifth {
-  left: 60%;
-  top: 80%;
-}
-
-.sixth {
-  left: 15%;
-  top: 95%;
-}
-
-.marker {
-  width: 100px;
-  height: 100px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-}
-
+/* THE MOVING DIAMOND */
 .box {
+  position: absolute;
   width: 100px;
   height: 100px;
-  z-index: 10;
+  z-index: 50;
   border-radius: 10px;
   background-image: url("https://assets.codepen.io/16327/flair-26.png");
   background-size: contain;
   background-repeat: no-repeat;
-  background-color: transparent;
+  background-position: center;
+  pointer-events: none;
+  filter: drop-shadow(0 0 15px rgba(255, 50, 50, 0.8));
+  will-change: transform;
+}
+
+/* --- ROW LAYOUTS --- */
+.stepContainer {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  width: auto;
+}
+
+/* DESKTOP CONFIG: Pushed to 0% for maximum spread */
+.alignLeft {
+  left: 0%;
+  /* Was 10% */
+  flex-direction: row;
+}
+
+.alignRight {
+  left: auto;
+  right: 0%;
+  /* Was 10% */
+  flex-direction: row-reverse;
+  text-align: right;
+}
+
+/* THE MARKER */
+.marker {
+  width: 120px;
+  height: 120px;
+  min-width: 120px;
+  border-radius: 12px;
+  background: rgba(10, 10, 10, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Number Styling */
+  font-family: monospace;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.2);
+  letter-spacing: -2px;
+  transition: all 0.3s ease;
+}
+
+/* Hover effect on marker */
+.stepContainer:hover .marker {
+  border-color: #ff3333;
+  color: #ff3333;
+  box-shadow: 0 0 30px rgba(255, 50, 50, 0.2);
+}
+
+/* THE TEXT CARD */
+.textCard {
+  width: 350px;
+  color: white;
+  z-index: 10;
+}
+
+.categoryTitle {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #ff3333;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+  line-height: 1;
+  letter-spacing: 0.02em;
+}
+
+.categoryDesc {
+  font-size: 1rem;
+  color: #a3a3a3;
+  line-height: 1.6;
+  font-weight: 300;
+}
+
+.ctaLink {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: white;
+  opacity: 0.6;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+  padding-bottom: 4px;
+  transition: all 0.3s ease;
+}
+
+.ctaLink:hover {
+  color: #ff3333;
+  border-color: #ff3333;
+  opacity: 1;
+}
+
+/* --- MOBILE RESPONSIVENESS (UNCHANGED) --- */
+@media (max-width: 768px) {
+  .pathContainer {
+    padding: 0;
+    /* Reset padding for mobile */
+  }
+
+  .box {
+    width: 50px;
+    height: 50px;
+  }
+
+  .marker {
+    width: 60px;
+    height: 60px;
+    min-width: 60px;
+    font-size: 1.25rem;
+    border-radius: 8px;
+  }
+
+  .textCard {
+    width: 55vw;
+  }
+
+  .stepContainer {
+    gap: 1rem;
+  }
+
+  .categoryTitle {
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .categoryDesc {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Mobile specific alignment kept intact */
+  .alignLeft {
+    left: 2%;
+  }
+
+  .alignRight {
+    right: 2%;
+  }
 }
