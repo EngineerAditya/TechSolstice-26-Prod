@@ -12,8 +12,27 @@ import { SponsorsSection } from "@/components/sponsors-section";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
+  // Default to false so it NEVER renders on server or initial mobile paint
+  const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
+    // 1. Mobile Check Logic
+    // We only set showVideo to true if it is strictly a desktop
+    const checkDesktop = () => {
+      if (window.innerWidth >= 768) {
+        setShowVideo(true);
+      } else {
+        setShowVideo(false);
+      }
+    };
+
+    // Run immediately on mount
+    checkDesktop();
+
+    // Add listener for resizing (e.g. rotating tablet or resizing window)
+    window.addEventListener("resize", checkDesktop);
+
+    // 2. Smooth Scroll Logic (Lenis)
     let rafId: number;
     (async () => {
       try {
@@ -28,7 +47,11 @@ export default function Home() {
         console.warn("Lenis failed to load", e);
       }
     })();
-    return () => cancelAnimationFrame(rafId);
+
+    return () => {
+      window.removeEventListener("resize", checkDesktop);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const handleLoadingComplete = () => {
@@ -52,11 +75,14 @@ export default function Home() {
         <HeroRobot />
 
         {/* 2. REVEAL VIDEO (YouTube) */}
-        <YouTubeScrollVideo
-          videoId="comtgOhuXIg"
-          title="TechSolstice'26"
-          scrollToExpand="Initiate Sequence"
-        />
+        {/* CONDITIONAL RENDER: Only renders if showVideo is true (Desktop) */}
+        {showVideo && (
+          <YouTubeScrollVideo
+            videoId="comtgOhuXIg"
+            title="TechSolstice'26"
+            scrollToExpand="Initiate Sequence"
+          />
+        )}
 
         {/* 3. FEST INFO */}
         <div className="relative z-10 mt-0 md:-mt-1 bg-black">
@@ -65,7 +91,6 @@ export default function Home() {
 
         {/* 4. SCROLL PATH ANIMATION (Categories) */}
         <div className="mt-8">
-          {/* FIX: Removed 'items={timelineData}' because the component now has the data built-in */}
           <ScrollPathAnimation />
         </div>
 
