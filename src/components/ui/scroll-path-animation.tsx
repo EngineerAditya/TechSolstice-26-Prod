@@ -64,6 +64,7 @@ export function ScrollPathAnimation() {
       ctx = gsap.context(() => {
         const box = boxRef.current;
         const container = containerRef.current;
+        // Type Guard to ensure valid HTML elements
         const markers = markerRefs.current.filter((m): m is HTMLDivElement => m !== null);
 
         if (!box || !container || markers.length === 0) return;
@@ -116,9 +117,9 @@ export function ScrollPathAnimation() {
     };
   }, []);
 
-  // FIX: Added +50vh buffer to total height.
-  // This prevents the last card (which is at top:100%) from overlapping the footer.
-  const totalHeight = (zones.length * 45) + 50;
+  // SPACING CALCULATION:
+  // 45vh per item gives good breathing room.
+  const totalHeight = zones.length * 45;
 
   return (
     <div className={styles.mainWrapper}>
@@ -146,8 +147,11 @@ export function ScrollPathAnimation() {
           const isRight = index % 2 === 0;
           const indexStr = (index + 1).toString().padStart(2, '0');
 
-          // Position Logic (0% to 100% of the calculated height)
-          const topPos = (index / (zones.length - 1)) * 100;
+          // --- FIX IS HERE ---
+          // OLD LOGIC: (index / length) * 100  -> Resulted in 100% for last item
+          // NEW LOGIC: (index / length) * 85   -> Caps the last item at 85% height
+          // This leaves 15% of the container empty at the bottom for the card content.
+          const topPos = (index / (zones.length - 1)) * 90;
 
           return (
             <div
@@ -175,8 +179,8 @@ export function ScrollPathAnimation() {
       </div>
 
       {/* Bottom CTA Section */}
-      {/* Added z-10 and relative positioning to ensure it sits ON TOP of any stray background elements */}
-      <div className="relative z-10 py-24 flex flex-col items-center justify-center text-center px-4 bg-gradient-to-t from-black via-black/80 to-transparent">
+      {/* Added margin-top to physically push it away if absolute overlap still happens */}
+      <div className="relative z-10 py-32 mt-20 flex flex-col items-center justify-center text-center px-4 bg-gradient-to-t from-black via-black/90 to-transparent">
         <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 drop-shadow-lg">
           Ready to Compete?
         </h2>
@@ -185,7 +189,6 @@ export function ScrollPathAnimation() {
           className="group relative inline-flex items-center justify-center px-10 py-4 bg-red-600 text-white font-bold text-lg rounded-full overflow-hidden transition-all duration-300 hover:bg-red-700 hover:scale-105 hover:shadow-[0_0_30px_rgba(220,38,38,0.6)]"
         >
           <span className="relative z-10">View All Events</span>
-          {/* Shine Effect on Button */}
           <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         </Link>
       </div>

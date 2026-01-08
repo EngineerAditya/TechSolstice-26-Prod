@@ -28,11 +28,14 @@
 .pathContainer {
   position: relative;
   width: 100%;
-  /* CHANGED: Increased width to allow wider travel on desktop */
   max-width: 1400px;
   margin: 0 auto;
-  /* Added padding to prevent touching edges on smaller laptops */
   padding: 0 2rem;
+
+  /* CRITICAL FIX FOR OVERLAP: 
+     Add huge bottom padding. This ensures that even if the last item 
+     is positioned at 90%, there is empty space below it inside the container. */
+  padding-bottom: 40vh;
 }
 
 /* THE MOVING DIAMOND */
@@ -58,19 +61,19 @@
   align-items: center;
   gap: 3rem;
   width: auto;
+  /* Ensure z-index is lower than the diamond but correct context */
+  z-index: 10;
 }
 
 /* DESKTOP CONFIG: Pushed to 0% for maximum spread */
 .alignLeft {
   left: 0%;
-  /* Was 10% */
   flex-direction: row;
 }
 
 .alignRight {
   left: auto;
   right: 0%;
-  /* Was 10% */
   flex-direction: row-reverse;
   text-align: right;
 }
@@ -88,8 +91,6 @@
   display: flex;
   justify-content: center;
   align-items: center;
-
-  /* Number Styling */
   font-family: monospace;
   font-size: 2.5rem;
   font-weight: 700;
@@ -98,7 +99,6 @@
   transition: all 0.3s ease;
 }
 
-/* Hover effect on marker */
 .stepContainer:hover .marker {
   border-color: #ff3333;
   color: #ff3333;
@@ -148,11 +148,12 @@
   opacity: 1;
 }
 
-/* --- MOBILE RESPONSIVENESS (UNCHANGED) --- */
+/* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
   .pathContainer {
     padding: 0;
-    /* Reset padding for mobile */
+    /* Maintain the safety padding on mobile */
+    padding-bottom: 40vh;
   }
 
   .box {
@@ -190,7 +191,6 @@
     overflow: hidden;
   }
 
-  /* Mobile specific alignment kept intact */
   .alignLeft {
     left: 2%;
   }
