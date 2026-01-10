@@ -6,6 +6,7 @@ import { ChatbotWidget } from "@/components/chatbot-widget";
 import ASMRStaticBackground from '@/components/ui/asmr-static-background';
 import TechSolsticeNavbar from '@/components/navbar';
 import { Footer } from '@/components/footer';
+import Logo from '@/components/ui/logo';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,6 +41,11 @@ export default function RootLayout({
         <SpeedInsights />
         {/* Background layer - lowest z-index */}
         <ASMRStaticBackground />
+
+        {/* Fixed Logo - same as homepage */}
+        <div className="fixed top-4 left-4 md:top-6 md:left-8 z-50">
+          <Logo />
+        </div>
 
         {/* Global sticky navbar - high z-index to stay on top */}
         <div className="relative z-50">

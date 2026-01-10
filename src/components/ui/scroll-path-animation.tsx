@@ -6,49 +6,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { MotionPathPlugin } from 'gsap/MotionPathPlugin';
 import Link from 'next/link';
 import styles from './scroll-path-animation.module.css';
+import { EVENT_CATEGORIES } from '@/lib/constants/categories';
 
 gsap.registerPlugin(ScrollTrigger, MotionPathPlugin);
-
-// --- DATA CONFIGURATION ---
-type Zone = {
-  title: string;
-  description: string;
-};
-
-const zones: Zone[] = [
-  {
-    title: "Coding & Dev",
-    description: "Hackathons and competitive coding battles. Prove your logic dominates the syntax.",
-  },
-  {
-    title: "Robotics & Hardware",
-    description: "Drone racing, line followers, and combat bots. Witness metal clash and circuits spark.",
-  },
-  {
-    title: "Finance & Strategy",
-    description: "Master the markets. Where high stakes meet sharp business acumen and strategy.",
-  },
-  {
-    title: "Quizzes & Tech Games",
-    description: "Test your trivia. It’s not just what you know, but how fast you can recall it.",
-  },
-  {
-    title: "Creative & Design",
-    description: "UI/UX face-offs and digital art. Where aesthetics meet functionality.",
-  },
-  {
-    title: "Innovation & Ideation",
-    description: "Startup prototypes and research. The launchpad for the next big disruption.",
-  },
-  {
-    title: "Gaming Zone",
-    description: "Valorant, FIFA, and Tekken tournaments for ultimate bragging rights.",
-  },
-  {
-    title: "Other Events",
-    description: "Treasure hunts, fun stalls, and informal events. Because a fest is nothing without vibes.",
-  }
-];
 
 export function ScrollPathAnimation() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -119,7 +79,7 @@ export function ScrollPathAnimation() {
 
   // SPACING CALCULATION:
   // 45vh per item gives good breathing room.
-  const totalHeight = zones.length * 45;
+  const totalHeight = EVENT_CATEGORIES.length * 45;
 
   return (
     <div className={styles.mainWrapper}>
@@ -143,7 +103,7 @@ export function ScrollPathAnimation() {
       >
         <div ref={boxRef} className={styles.box}></div>
 
-        {zones.map((zone, index) => {
+        {EVENT_CATEGORIES.map((category, index) => {
           const isRight = index % 2 === 0;
           const indexStr = (index + 1).toString().padStart(2, '0');
 
@@ -151,18 +111,18 @@ export function ScrollPathAnimation() {
           // OLD LOGIC: (index / length) * 100  -> Resulted in 100% for last item
           // NEW LOGIC: (index / length) * 85   -> Caps the last item at 85% height
           // This leaves 15% of the container empty at the bottom for the card content.
-          const topPos = (index / (zones.length - 1)) * 90;
+          const topPos = (index / (EVENT_CATEGORIES.length - 1)) * 90;
 
           return (
             <div
-              key={index}
+              key={category.id}
               className={`${styles.stepContainer} ${isRight ? styles.alignRight : styles.alignLeft}`}
               style={{ top: `${topPos}%` }}
             >
               <div className={styles.textCard}>
-                <h4 className={styles.categoryTitle}>{zone.title}</h4>
-                <p className={styles.categoryDesc}>{zone.description}</p>
-                <Link href="/events" className={styles.ctaLink}>
+                <h4 className={styles.categoryTitle}>{category.title}</h4>
+                <p className={styles.categoryDesc}>{category.description}</p>
+                <Link href={`/events/${category.slug}`} className={styles.ctaLink}>
                   Explore &rarr;
                 </Link>
               </div>

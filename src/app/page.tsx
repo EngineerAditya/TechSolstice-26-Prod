@@ -66,11 +66,6 @@ export default function Home() {
         className={`w-full transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"
           }`}
       >
-        {/* --- FIXED LOGO HEADER --- */}
-        <div className="fixed top-4 left-4 md:top-6 md:left-8 z-50">
-          <Logo />
-        </div>
-
         {/* 1. HERO SECTION */}
         <HeroRobot />
 
