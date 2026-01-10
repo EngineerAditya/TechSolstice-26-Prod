@@ -6,7 +6,7 @@ const EventsPage = async () => {
   return (
     <div className="min-h-screen w-full relative">
       {/* Hero Section - Fixed height to prevent CLS */}
-      <div className="relative h-[400px] md:h-[500px] lg:h-[600px] px-4 overflow-hidden z-10 bg-black/10 flex items-center justify-center">
+      <div className="relative min-h-[400px] md:min-h-[500px] lg:min-h-[600px] px-4 z-10 bg-black/10 flex items-center justify-center py-20">
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto text-center">
@@ -25,7 +25,7 @@ const EventsPage = async () => {
       {/* Categories Grid - Fixed heights to prevent CLS */}
       <div className="max-w-6xl mx-auto px-4 pb-32 relative z-10 bg-black/10">
         {/* Reserve space for exact card dimensions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8" style={{ minHeight: '800px' }}>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {EVENT_CATEGORIES.map((category, index) => (
             <div key={category.id} className="h-[350px] md:h-[400px]">
               <CategoryCard category={category} index={index} />
