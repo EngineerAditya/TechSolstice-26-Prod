@@ -5,7 +5,6 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import Logo from "@/components/ui/logo";
 import { useMediaQuery } from "@/hooks/use-media-query";
-import { useEffect, useRef, useState } from "react";
 
 // Dynamically load the responsive flicker component on client only
 const FlickeringGridResponsiveLazy = dynamic(
@@ -17,9 +16,10 @@ export const siteConfig = {
   contactData: {
     eventName: "TechSolstice'26",
     address: [
-      "Manipal Institute of Technology",
-      "Yelahanka, Bengaluru",
-      "Karnataka - 560064",
+      "Manipal Institute of Technology (MIT)",
+      "Manipal Academy of Higher Education (MAHE), Bengaluru Campus",
+      "BSF Campus, Yelahanka",
+      "Bengaluru, Karnataka 560064",
     ],
     generalEmail: "fest.mitblr@manipal.edu",
     contacts: [
@@ -66,7 +66,7 @@ export const Footer = () => {
             </div>
 
             {/* Address below logos */}
-            <div className="text-center text-sm text-neutral-400 space-y-0.5">
+            <div className="text-center text-base text-neutral-400 space-y-0.5">
               {siteConfig.contactData.address.map((line, i) => (
                 <div key={i}>{line}</div>
               ))}
@@ -122,7 +122,7 @@ export const Footer = () => {
                 </div>
 
                 {/* Address */}
-                <div className="text-sm lg:text-base text-neutral-400 space-y-1 leading-relaxed">
+                <div className="text-base lg:text-lg text-neutral-400 space-y-1 leading-relaxed">
                   {siteConfig.contactData.address.map((line, i) => (
                     <div key={i}>{line}</div>
                   ))}
@@ -188,47 +188,18 @@ export const Footer = () => {
 };
 
 function FlickerOnView({ text, baseFontSize }: { text: string; baseFontSize: number }) {
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [loadFlicker, setLoadFlicker] = useState(false);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const io = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setLoadFlicker(true);
-            io.disconnect();
-            return;
-          }
-        }
-      },
-      { 
-        threshold: 0,
-        rootMargin: '200px'
-      }
-    );
-
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-
   return (
-    <div ref={containerRef} className="absolute inset-0 z-10 w-full">
-      {loadFlicker && (
-        <FlickeringGridResponsiveLazy
-          text={text}
-          baseFontSize={baseFontSize}
-          className="h-full w-full"
-          squareSize={3}
-          gridGap={3}
-          color="#D33A4A"
-          maxOpacity={0.4}
-          flickerChance={0.15}
-        />
-      )}
+    <div className="absolute inset-0 z-10 w-full">
+      <FlickeringGridResponsiveLazy
+        text={text}
+        baseFontSize={baseFontSize}
+        className="h-full w-full"
+        squareSize={3}
+        gridGap={3}
+        color="#D33A4A"
+        maxOpacity={0.4}
+        flickerChance={0.15}
+      />
     </div>
   );
 }

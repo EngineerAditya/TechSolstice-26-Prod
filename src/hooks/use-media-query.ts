@@ -1,40 +1,32 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useState } from "react";
 
 export function useMediaQuery(query: string): boolean {
-  const [matches, setMatches] = useState(false);
-
-  const handleChange = useCallback((mediaQuery: MediaQueryList) => {
-    setMatches(mediaQuery.matches);
-  }, []);
+  const [matches, setMatches] = useState(() => {
+    // Return false during SSR to match initial server render
+    if (typeof window === "undefined") return false;
+    // On client, immediately check the media query
+    return window.matchMedia(query).matches;
+  });
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
     const mediaQuery = window.matchMedia(query);
     
-    // Set initial value
+    // Update to current value on mount
     setMatches(mediaQuery.matches);
 
-    // Add listener
-    const listener = (event: MediaQueryListEvent) => handleChange(event as any);
-    
-    if (mediaQuery.addListener) {
-      mediaQuery.addListener(listener);
-    } else {
-      mediaQuery.addEventListener('change', listener);
-    }
-
-    // Cleanup
-    return () => {
-      if (mediaQuery.removeListener) {
-        mediaQuery.removeListener(listener);
-      } else {
-        mediaQuery.removeEventListener('change', listener);
-      }
+    // Listen for changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      setMatches(e.matches);
     };
-  }, [query, handleChange]);
+
+    mediaQuery.addEventListener('change', handleChange);
+
+    return () => {
+      mediaQuery.removeEventListener('change', handleChange);
+    };
+  }, [query]);
 
   return matches;
 }

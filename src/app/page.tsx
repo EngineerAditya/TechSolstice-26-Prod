@@ -69,25 +69,27 @@ export default function Home() {
         {/* 1. HERO SECTION */}
         <HeroRobot />
 
-        {/* 2. REVEAL VIDEO (YouTube) */}
-        {/* CONDITIONAL RENDER: Only renders if showVideo is true (Desktop) */}
-        {showVideo && (
-          <YouTubeScrollVideo
-            videoId="comtgOhuXIg"
-            title="TechSolstice'26"
-            scrollToExpand="Initiate Sequence"
-          />
-        )}
-
-        {/* 3. FEST INFO */}
+        {/* 2. FEST INFO */}
         <div className="relative z-10 mt-0 md:-mt-1 bg-black">
           <FestInfo />
         </div>
 
-        {/* 4. SCROLL PATH ANIMATION (Categories) */}
+        {/* 3. SCROLL PATH ANIMATION (Categories) */}
         <div className="mt-8">
           <ScrollPathAnimation />
         </div>
+
+        {/* 4. REVEAL VIDEO (YouTube) */}
+        {/* CONDITIONAL RENDER: Only renders if showVideo is true (Desktop) */}
+        {showVideo && (
+          <div className="mt-12">
+            <YouTubeScrollVideo
+              videoId="comtgOhuXIg"
+              title="TechSolstice'26"
+              scrollToExpand="Initiate Sequence"
+            />
+          </div>
+        )}
 
         {/* 5. ZOOM PARALLAX GALLERY */}
         <div className="mt-12">
