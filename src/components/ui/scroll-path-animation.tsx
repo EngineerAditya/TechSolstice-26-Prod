@@ -18,28 +18,34 @@ export function ScrollPathAnimation() {
   useEffect(() => {
     let ctx: gsap.Context;
 
+    // Debounce resize to prevent layout thrashing
+    let resizeTimer: NodeJS.Timeout;
+
     const initAnimation = () => {
       if (ctx) ctx.revert();
 
       ctx = gsap.context(() => {
         const box = boxRef.current;
         const container = containerRef.current;
-        // Type Guard to ensure valid HTML elements
         const markers = markerRefs.current.filter((m): m is HTMLDivElement => m !== null);
 
         if (!box || !container || markers.length === 0) return;
+
+        // Force a layout recalculation before measuring
+        ScrollTrigger.refresh();
 
         const containerRect = container.getBoundingClientRect();
 
         // 1. Build Path Data relative to container
         const pathPoints = markers.map((marker) => {
           const rect = marker.getBoundingClientRect();
+          // Calculate center-to-center distance
           const x = (rect.left - containerRect.left) + (rect.width / 2) - (box.offsetWidth / 2);
           const y = (rect.top - containerRect.top) + (rect.height / 2) - (box.offsetHeight / 2);
           return { x, y };
         });
 
-        // 2. Set Initial Position
+        // 2. Set Initial Position to the first marker
         if (pathPoints.length > 0) {
           gsap.set(box, { x: pathPoints[0].x, y: pathPoints[0].y });
         }
@@ -48,38 +54,47 @@ export function ScrollPathAnimation() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: container,
-            start: "top center",
-            end: "bottom center", // Keeps diamond centered in viewport
-            scrub: 0.5,
+            start: "top center", // Start when container hits center of viewport
+            end: "bottom center", // End when container bottom hits center
+            scrub: 0.8, // Slightly smoother scrub
           }
         });
 
         tl.to(box, {
           motionPath: {
             path: pathPoints,
-            curviness: 1.2,
+            curviness: 1.25,
             autoRotate: false,
             alignOrigin: [0.5, 0.5],
           },
-          ease: "none",
+          ease: "linear", // Linear ease ensures constant speed along the path
         });
 
       }, containerRef);
     };
 
-    const timer = setTimeout(initAnimation, 200);
-    window.addEventListener('resize', initAnimation);
+    // Initialize with a small delay to ensure DOM is painted
+    const initialTimer = setTimeout(initAnimation, 100);
+
+    const handleResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(initAnimation, 200);
+    };
+
+    window.addEventListener('resize', handleResize);
 
     return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', initAnimation);
+      clearTimeout(initialTimer);
+      clearTimeout(resizeTimer);
+      window.removeEventListener('resize', handleResize);
       if (ctx) ctx.revert();
     };
   }, []);
 
-  // SPACING CALCULATION:
-  // 45vh per item gives good breathing room.
-  const totalHeight = EVENT_CATEGORIES.length * 45;
+  // CONFIGURATION
+  // Reduced from 45vh to 25vh to decrease scroll distance
+  const ITEM_SPACING_VH = 25;
+  const totalHeightVh = EVENT_CATEGORIES.length * ITEM_SPACING_VH;
 
   return (
     <div className={styles.mainWrapper}>
@@ -92,14 +107,15 @@ export function ScrollPathAnimation() {
         <p className="text-red-500 font-mono text-xs uppercase tracking-[0.2em] animate-pulse">
           Scroll to navigate
         </p>
-        <div className="w-[1px] h-16 bg-gradient-to-b from-red-600 via-red-900 to-transparent mx-auto mt-8" />
+        <div className="w-[1px] h-12 bg-gradient-to-b from-red-600 via-red-900 to-transparent mx-auto mt-6" />
       </div>
 
       {/* Path Container */}
       <div
         ref={containerRef}
         className={styles.pathContainer}
-        style={{ height: `${totalHeight}vh` }}
+        // Add padding bottom to ensure the last card has breathing room
+        style={{ height: `${totalHeightVh}vh`, paddingBottom: '20vh' }}
       >
         <div ref={boxRef} className={styles.box}></div>
 
@@ -107,11 +123,10 @@ export function ScrollPathAnimation() {
           const isRight = index % 2 === 0;
           const indexStr = (index + 1).toString().padStart(2, '0');
 
-          // --- FIX IS HERE ---
-          // OLD LOGIC: (index / length) * 100  -> Resulted in 100% for last item
-          // NEW LOGIC: (index / length) * 85   -> Caps the last item at 85% height
-          // This leaves 15% of the container empty at the bottom for the card content.
-          const topPos = (index / (EVENT_CATEGORIES.length - 1)) * 90;
+          // LOGIC FIX: Safe division to prevent Infinity if only 1 category exists
+          // We distribute items from 0% to 100% of the available vertical space
+          const safeDenominator = EVENT_CATEGORIES.length > 1 ? EVENT_CATEGORIES.length - 1 : 1;
+          const topPos = (index / safeDenominator) * 100;
 
           return (
             <div
@@ -139,8 +154,7 @@ export function ScrollPathAnimation() {
       </div>
 
       {/* Bottom CTA Section */}
-      {/* Added margin-top to physically push it away if absolute overlap still happens */}
-      <div className="relative z-10 py-32 mt-20 flex flex-col items-center justify-center text-center px-4 bg-gradient-to-t from-black via-black/90 to-transparent">
+      <div className="relative z-10 py-24 flex flex-col items-center justify-center text-center px-4 bg-gradient-to-t from-black via-black/90 to-transparent">
         <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 drop-shadow-lg">
           Ready to Compete?
         </h2>

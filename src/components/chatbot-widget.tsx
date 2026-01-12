@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { MorphChatPanel } from "./ui/ai-chat-ui"
 
 // Local Message type to avoid importing client-only module during SSR
@@ -90,6 +90,39 @@ export function ChatbotWidget() {
       setIsLoading(false)
     }
   }
+
+  // Local welcome message when the widget opens (no LLM call)
+  useEffect(() => {
+    if (!isOpen) return
+
+    // Only show the welcome once per browser session
+    try {
+      const shown = typeof window !== 'undefined' && sessionStorage.getItem('sparky_welcome_shown')
+      if (shown) return
+    } catch (e) {
+      // ignore sessionStorage errors
+    }
+
+    const welcome = "Hello there! I'm Sparky — here to help you with any question regarding TechSolstice. Ask me about schedules, speakers, passes, or workshops."
+
+    // Avoid duplicate welcome if it's already in messages
+    const already = messages.some((m) => m.content === welcome)
+    if (!already) {
+      const assistantMessage: Message = {
+        id: `msg-welcome-${Date.now()}`,
+        role: "assistant",
+        content: welcome,
+        timestamp: new Date(),
+      }
+      setMessages((prev) => [...prev, assistantMessage])
+      try {
+        sessionStorage.setItem('sparky_welcome_shown', '1')
+      } catch (e) {
+        // ignore
+      }
+    }
+  // Only re-run when `isOpen` changes
+  }, [isOpen])
 
   return (
     <MorphChatPanel

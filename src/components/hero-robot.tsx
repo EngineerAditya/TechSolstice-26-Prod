@@ -1,94 +1,116 @@
 "use client";
 
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { PatternText } from "@/components/ui/pattern-text";
 
-const SplineScene = dynamic(() => import("./ui/spline-scene").then((m) => m.SplineScene), { ssr: false });
+// Dynamic import with transparent fallback for ASMR background visibility
+const SplineScene = dynamic(() => import("./ui/spline-scene").then((m) => m.SplineScene), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-transparent" />
+});
 
 export function HeroRobot() {
   const titleRef = useRef<HTMLHeadingElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [fontSize, setFontSize] = useState<number>(120);
+
+  // Logic: Only load heavy 3D elements if width >= 1024px (Laptops/Desktops)
   const isLaptopOrLarger = useMediaQuery("(min-width: 1024px)");
 
-  useLayoutEffect(() => {
+  const measureText = useCallback(() => {
     if (!containerRef.current || !titleRef.current) return;
 
-    let raf = 0;
+    const container = containerRef.current;
+    const title = titleRef.current;
+    if (container.clientWidth === 0) return;
 
-    const measure = () => {
-      const container = containerRef.current!;
-      const title = titleRef.current!;
-      if (container.clientWidth === 0) return;
-      const available = container.clientWidth - 32; // small padding
+    const availableWidth = container.clientWidth - 32;
 
-      // Create offscreen canvas to measure text width
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      if (!ctx) return;
+    // Create canvas only once per measure call
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-      const fontFamily = "Michroma, Doto, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif";
-      const weight = "700";
+    const fontFamily = "Michroma, Doto, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, sans-serif";
+    const weight = "700";
 
-      // Start from a large font and shrink until it fits
-      let size = 120;
+    let size = 120;
+    ctx.font = `${weight} ${size}px ${fontFamily}`;
+
+    // Get text content safely
+    const text = title.textContent || "TechSolstice'26";
+    let metrics = ctx.measureText(text);
+
+    let iterations = 0;
+    // Cap iterations to prevent infinite loops if something goes wrong
+    while (metrics.width > availableWidth && size > 20 && iterations < 100) {
+      size -= 2;
       ctx.font = `${weight} ${size}px ${fontFamily}`;
-      let metrics = ctx.measureText(title.textContent || "");
+      metrics = ctx.measureText(text);
+      iterations++;
+    }
 
-      while (metrics.width > available && size > 20) {
-        size -= 2;
-        ctx.font = `${weight} ${size}px ${fontFamily}`;
-        metrics = ctx.measureText(title.textContent || "");
-      }
-
-      setFontSize(size);
-    };
-
-    const onResize = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(measure);
-    };
-
-    measure();
-    window.addEventListener("resize", onResize);
-
-    const ro = new ResizeObserver(onResize);
-    ro.observe(containerRef.current as Element);
-
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", onResize);
-      ro.disconnect();
-    };
+    setFontSize(size);
   }, []);
 
-  return (
-    // Container for the hero section - full screen and responsive
-    <section className="relative h-screen w-full overflow-hidden" ref={containerRef}>
-      {/* Hero background no tint/blur (removed tint/blur per request) */}
+  useEffect(() => {
+    measureText();
 
-      {/* Spline 3D Scene - only render on laptop+ to avoid loading heavy assets on small screens */}
-      {isLaptopOrLarger && (
-        <div className="absolute inset-0 z-10">
-          {/* Add priority loading optimization for LCP */}
-          <React.Suspense fallback={<div className="w-full h-full bg-black/10" />}>
+    // Debounce resize handling
+    let timeoutId: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        requestAnimationFrame(measureText);
+      }, 100);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    // Use ResizeObserver for container-specific changes
+    const resizeObserver = new ResizeObserver(() => {
+      handleResize();
+    });
+
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      clearTimeout(timeoutId);
+      resizeObserver.disconnect();
+    };
+  }, [measureText]);
+
+  return (
+    <section className="relative h-screen w-full overflow-hidden" ref={containerRef}>
+
+      {/* 3D Scene Layer */}
+      <div className="absolute inset-0 z-10">
+        {isLaptopOrLarger ? (
+          <React.Suspense fallback={<div className="w-full h-full bg-transparent" />}>
             <SplineScene
               scene="https://prod.spline.design/kZDDjO5HuC9GJUM2/scene.splinecode"
-              className="w-full h-full touch-none"
+              className="w-full h-full"
             />
           </React.Suspense>
-        </div>
-      )}
+        ) : (
+          // Mobile Fallback: Transparent to show ASMR background
+          <div className="w-full h-full bg-transparent" />
+        )}
+      </div>
 
-      {/* Centered Text Overlay - Above Spline scene */}
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-2 sm:px-4 md:px-6 lg:px-8">
+      {/* Text Overlay Layer */}
+      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none px-4">
         <div
           ref={titleRef}
           className="text-center w-full max-w-full overflow-visible relative"
           style={{
             fontSize: `${fontSize}px`,
+            lineHeight: 1.1,
           }}
         >
           <PatternText

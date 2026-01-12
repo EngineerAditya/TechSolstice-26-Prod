@@ -1,21 +1,17 @@
-/* scroll-path-animation.module.css */
-
 .mainWrapper {
   position: relative;
   width: 100%;
   overflow: hidden;
   background: black;
-  /* Grid Background */
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 2px, transparent 2px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 2px, transparent 2px),
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
-  background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
+  /* Subtle Grid Background */
+  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 50px 50px;
+  background-position: center;
 }
 
 .introSpacer {
-  height: 40vh;
+  height: 30vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -30,27 +26,24 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 2rem;
-
-  /* CRITICAL FIX FOR OVERLAP: 
-     Add huge bottom padding. This ensures that even if the last item 
-     is positioned at 90%, there is empty space below it inside the container. */
-  padding-bottom: 40vh;
+  /* Note: Padding here won't affect absolute children, 
+     so we handle spacing in .alignLeft/.alignRight below */
+  height: 100%;
 }
 
 /* THE MOVING DIAMOND */
 .box {
   position: absolute;
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
   z-index: 50;
-  border-radius: 10px;
+  border-radius: 12px;
   background-image: url("https://assets.codepen.io/16327/flair-26.png");
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
   pointer-events: none;
-  filter: drop-shadow(0 0 15px rgba(255, 50, 50, 0.8));
+  filter: drop-shadow(0 0 15px rgba(255, 50, 50, 0.6));
   will-change: transform;
 }
 
@@ -59,50 +52,52 @@
   position: absolute;
   display: flex;
   align-items: center;
-  gap: 3rem;
+  gap: 2rem;
   width: auto;
-  /* Ensure z-index is lower than the diamond but correct context */
   z-index: 10;
+  transform: translateY(-50%);
 }
 
-/* DESKTOP CONFIG: Pushed to 0% for maximum spread */
+/* DESKTOP BOUNDARIES */
+/* We use percentage or large rems to keep content centralized */
 .alignLeft {
-  left: 0%;
+  left: 10%;
+  /* Moves it away from the left edge */
   flex-direction: row;
 }
 
 .alignRight {
   left: auto;
-  right: 0%;
+  right: 10%;
+  /* Moves it away from the right edge */
   flex-direction: row-reverse;
   text-align: right;
 }
 
 /* THE MARKER */
 .marker {
-  width: 120px;
-  height: 120px;
-  min-width: 120px;
-  border-radius: 12px;
-  background: rgba(10, 10, 10, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  width: 100px;
+  height: 100px;
+  min-width: 100px;
+  border-radius: 16px;
+  background: rgba(15, 15, 15, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
+  backdrop-filter: blur(8px);
   display: flex;
   justify-content: center;
   align-items: center;
   font-family: monospace;
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  color: rgba(255, 255, 255, 0.2);
-  letter-spacing: -2px;
+  color: rgba(255, 255, 255, 0.3);
   transition: all 0.3s ease;
 }
 
 .stepContainer:hover .marker {
   border-color: #ff3333;
   color: #ff3333;
-  box-shadow: 0 0 30px rgba(255, 50, 50, 0.2);
+  box-shadow: 0 0 25px rgba(255, 50, 50, 0.25);
 }
 
 /* THE TEXT CARD */
@@ -117,15 +112,14 @@
   font-weight: 800;
   color: #ff3333;
   text-transform: uppercase;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
   line-height: 1;
-  letter-spacing: 0.02em;
 }
 
 .categoryDesc {
   font-size: 1rem;
   color: #a3a3a3;
-  line-height: 1.6;
+  line-height: 1.5;
   font-weight: 300;
 }
 
@@ -150,12 +144,20 @@
 
 /* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
-  .pathContainer {
-    padding: 0;
-    /* Maintain the safety padding on mobile */
-    padding-bottom: 40vh;
+
+  /* FORCE MARGINS ON MOBILE */
+  /* Instead of left: 0, we give it safe breathing room */
+  .alignLeft {
+    left: 1.5rem;
+    /* ~24px safe margin from left edge */
   }
 
+  .alignRight {
+    right: 1.5rem;
+    /* ~24px safe margin from right edge */
+  }
+
+  /* Reduce sizes for mobile fit */
   .box {
     width: 50px;
     height: 50px;
@@ -166,11 +168,14 @@
     height: 60px;
     min-width: 60px;
     font-size: 1.25rem;
-    border-radius: 8px;
+    border-radius: 10px;
   }
 
   .textCard {
-    width: 55vw;
+    /* Dynamic width calculation to ensure it fits: 
+       100vw - (Margin * 2) - MarkerWidth - Gap */
+    width: calc(100vw - 3rem - 60px - 1rem);
+    max-width: 300px;
   }
 
   .stepContainer {
@@ -179,23 +184,14 @@
 
   .categoryTitle {
     font-size: 1.1rem;
-    margin-bottom: 0.25rem;
   }
 
   .categoryDesc {
-    font-size: 0.8rem;
-    line-height: 1.4;
+    font-size: 0.85rem;
+    /* Limit lines to prevent text blocks overlapping vertically */
     display: -webkit-box;
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
-  }
-
-  .alignLeft {
-    left: 2%;
-  }
-
-  .alignRight {
-    right: 2%;
   }
 }

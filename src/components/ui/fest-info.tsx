@@ -19,14 +19,9 @@ export default function FestInfo() {
       <div className="container relative mx-auto px-6 z-10 md:px-12 text-center">
 
         {/* --- Minimalist Wrapper --- */}
-        {/* Removed the heavy glass background. Just a whisper of a border. */}
         <div className="mx-auto max-w-4xl p-4 md:p-12 relative">
 
-          {/* Animated Gooey Text */}
-          {/* STRATEGY: High contrast. 
-             The text is pure, vibrant red. The background is deep black.
-             No drop-shadows allows the "liquid" animation to be the main star.
-          */}
+          {/* Animated Gooey Text - Core Values */}
           <div className="relative z-10 mb-8">
             <GooeyText
               texts={["Collaborate.", "Compete.", "Create."]}
@@ -40,22 +35,44 @@ export default function FestInfo() {
           {/* Divider Line */}
           <div className="w-16 h-1 mx-auto rounded-full mb-8" style={{ backgroundColor: "rgba(125, 13, 44, 0.3)" }}></div>
 
-          {/* Sub-header: Clean white, no gradients */}
-          <p className="text-sm md:text-base font-medium tracking-[0.2em] uppercase text-neutral-400 mb-8">
-            TechSolstice '26 <span className="text-red-900 px-2">//</span> MIT Bengaluru
+          {/* Sub-header: Event Details */}
+          <p className="text-sm md:text-base font-medium tracking-[0.2em] uppercase text-neutral-400 mb-4">
+            TechSolstice '26 <span className="text-red-900 px-2">//</span> February 20-22
           </p>
 
-          {/* Body Text: Muted gray for elegance. High readability. */}
-          <div className="max-w-2xl mx-auto text-sm md:text-lg text-neutral-500 leading-relaxed font-normal space-y-6">
-            <p>
-              A convergence of creativity, future tech, and entrepreneurship.
-              Bridging the gap between <span className="text-neutral-300">bold ideas</span> and reality.
+          <p className="text-xs md:text-sm font-light tracking-wide uppercase text-neutral-500 mb-10">
+            Manipal Institute of Technology, Bengaluru
+          </p>
+
+          {/* Body Text: Concise and Impactful */}
+          <div className="max-w-2xl mx-auto text-base md:text-lg text-neutral-400 leading-relaxed space-y-5">
+            <p className="text-neutral-300">
+              TechSolstice is where <span className="text-red-500/90">innovation ignites</span> and brilliance takes center stage.
             </p>
 
             <p>
-              From the 36-Hour Hackathon to high-stakes Esports.
-              This is your platform to <span className="text-red-500/80">ignite the future</span>.
+              Join the brightest minds from across India for three electrifying days of cutting-edge challenges. From <span className="text-neutral-200">36-hour hackathons</span> to fierce <span className="text-neutral-200">robotic battles</span>—this is your arena to code, build, and conquer.
             </p>
+
+            <p className="text-neutral-500">
+              <span className="text-red-500/80">₹6.2L in prizes.</span> 30+ events. One unforgettable experience.
+            </p>
+          </div>
+
+          {/* Call-to-Action Stats */}
+          <div className="grid grid-cols-3 gap-6 md:gap-12 mt-12 max-w-2xl mx-auto">
+            <div className="text-center">
+              <div className="text-2xl md:text-4xl font-bold text-red-600 mb-2">30+</div>
+              <div className="text-xs md:text-sm text-neutral-500 uppercase tracking-wide">Events</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl md:text-4xl font-bold text-red-600 mb-2">₹6.2L</div>
+              <div className="text-xs md:text-sm text-neutral-500 uppercase tracking-wide">Prize Pool</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl md:text-4xl font-bold text-red-600 mb-2">3 Days</div>
+              <div className="text-xs md:text-sm text-neutral-500 uppercase tracking-wide">Of Innovation</div>
+            </div>
           </div>
 
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Mail, Phone } from "lucide-react";
+import { Mail, Phone, Linkedin, Instagram } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import Logo from "@/components/ui/logo";
@@ -27,11 +27,13 @@ export const siteConfig = {
         name: "Samaira Malik",
         role: "PR Head",
         phone: "+91 84462 03821",
+        email: "samaira1.mitblr2024@learner.manipal.edu",
       },
       {
         name: "Mahek Sethi",
         role: "PR Head",
         phone: "+91 98219 01461",
+        email: "mahek.mitblr2024@learner.manipal.edu",
       },
     ],
   },
@@ -64,6 +66,8 @@ export const Footer = () => {
             <div className="flex items-center justify-center">
               <Logo variant="compact" />
             </div>
+
+            {/* (social icons moved to Contact Us area) */}
 
             {/* Address below logos */}
             <div className="text-center text-base text-neutral-400 space-y-0.5">
@@ -103,8 +107,37 @@ export const Footer = () => {
                   <div className="text-sm text-neutral-400">
                     {contact.name} <span className="text-neutral-500">•</span> {contact.role}
                   </div>
+                  <a
+                    href={`mailto:${contact.email}`}
+                    className="flex items-center justify-center gap-2 text-sm text-neutral-400 hover:text-white transition-colors"
+                  >
+                    <Mail className="h-4 w-4" />
+                    <span>{contact.email}</span>
+                  </a>
                 </div>
               ))}
+            </div>
+
+            {/* Social icons - mobile, placed at bottom of contact area */}
+            <div className="flex items-center justify-center gap-4 mt-6">
+              <a
+                href="https://www.linkedin.com/company/techsolstice/"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TechSolstice on LinkedIn"
+                className="text-neutral-300 hover:text-white transition-colors"
+              >
+                <Linkedin className="w-7 h-7" />
+              </a>
+              <a
+                href="https://www.instagram.com/techsolstice.mitblr/#"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TechSolstice on Instagram"
+                className="text-neutral-300 hover:text-white transition-colors"
+              >
+                <Instagram className="w-7 h-7" />
+              </a>
             </div>
           </div>
         </div>
@@ -120,6 +153,9 @@ export const Footer = () => {
                 <div className="flex items-center gap-3 lg:gap-4 -ml-2">
                   <Logo variant="compact" />
                 </div>
+
+                {/* Social icons */}
+                {/* (social icons moved to Contact Us area) */}
 
                 {/* Address */}
                 <div className="text-base lg:text-lg text-neutral-400 space-y-1 leading-relaxed">
@@ -159,8 +195,36 @@ export const Footer = () => {
                       <div className="text-sm lg:text-base text-neutral-400">
                         {contact.name} <span className="text-neutral-600">•</span> {contact.role}
                       </div>
+                          <a
+                            href={`mailto:${contact.email}`}
+                            className="flex items-center justify-end gap-2.5 text-sm lg:text-base text-neutral-400 hover:text-white transition-colors"
+                          >
+                            <span className="text-sm lg:text-base">{contact.email}</span>
+                            <Mail className="h-4 w-4 lg:h-5 lg:w-5 text-neutral-400 group-hover:text-white transition-colors" />
+                          </a>
                     </div>
                   ))}
+                </div>
+                {/* Social icons - desktop contact side bottom */}
+                <div className="flex items-center justify-end gap-4 mt-4">
+                  <a
+                    href="https://www.linkedin.com/company/techsolstice/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="TechSolstice on LinkedIn"
+                    className="text-neutral-300 hover:text-white transition-colors"
+                  >
+                    <Linkedin className="w-7 h-7" />
+                  </a>
+                  <a
+                    href="https://www.instagram.com/techsolstice.mitblr/#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="TechSolstice on Instagram"
+                    className="text-neutral-300 hover:text-white transition-colors"
+                  >
+                    <Instagram className="w-7 h-7" />
+                  </a>
                 </div>
               </div>
             </div>

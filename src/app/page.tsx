@@ -6,38 +6,38 @@ import YouTubeScrollVideo from "@/components/ui/youtube-scroll-video";
 import { ScrollPathAnimation } from "@/components/ui/scroll-path-animation";
 import ZoomParallax from "@/components/ui/zoom-parallax";
 import FestInfo from "@/components/ui/fest-info";
+import SpeakerShowcase from "@/components/ui/speaker-showcase";
 import { LoadingScreen } from "../components/loading-screen";
-import Logo from "@/components/ui/logo";
 import { SponsorsSection } from "@/components/sponsors-section";
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
-  // Default to false so it NEVER renders on server or initial mobile paint
   const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
-    // 1. Mobile Check Logic
-    // We only set showVideo to true if it is strictly a desktop
+    // 1. Desktop Check for Video
     const checkDesktop = () => {
-      if (window.innerWidth >= 768) {
-        setShowVideo(true);
-      } else {
-        setShowVideo(false);
-      }
+      // 768px matches Tailwind's 'md' breakpoint
+      setShowVideo(window.innerWidth >= 768);
     };
 
-    // Run immediately on mount
+    // Run immediately and on resize
     checkDesktop();
-
-    // Add listener for resizing (e.g. rotating tablet or resizing window)
     window.addEventListener("resize", checkDesktop);
 
     // 2. Smooth Scroll Logic (Lenis)
+    let lenis: any;
     let rafId: number;
-    (async () => {
+
+    const initLenis = async () => {
       try {
         const Lenis = (await import('@studio-freight/lenis')).default;
-        const lenis = new Lenis();
+        lenis = new Lenis({
+          duration: 1.2,
+          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smoothWheel: true,
+        });
+
         function raf(time: number) {
           lenis.raf(time);
           rafId = requestAnimationFrame(raf);
@@ -46,11 +46,14 @@ export default function Home() {
       } catch (e) {
         console.warn("Lenis failed to load", e);
       }
-    })();
+    };
+
+    initLenis();
 
     return () => {
       window.removeEventListener("resize", checkDesktop);
-      cancelAnimationFrame(rafId);
+      if (rafId) cancelAnimationFrame(rafId);
+      if (lenis) lenis.destroy();
     };
   }, []);
 
@@ -59,28 +62,29 @@ export default function Home() {
   };
 
   return (
-    <>
+    <main className="min-h-screen w-full">
       {isLoading && <LoadingScreen onLoadingComplete={handleLoadingComplete} minDuration={2000} />}
 
       <div
-        className={`w-full transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"
-          }`}
+        className={`w-full transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"}`}
       >
-        {/* 1. HERO SECTION */}
         <HeroRobot />
 
-        {/* 2. FEST INFO */}
+        {/* FestInfo with conditional background if needed, currently kept standard */}
         <div className="relative z-10 mt-0 md:-mt-1 bg-black">
           <FestInfo />
         </div>
 
-        {/* 3. SCROLL PATH ANIMATION (Categories) */}
+        {/* Speaker showcase - placed after FestInfo and before ScrollPathAnimation */}
+        <div className="mt-8">
+          <SpeakerShowcase />
+        </div>
+
         <div className="mt-8">
           <ScrollPathAnimation />
         </div>
 
-        {/* 4. REVEAL VIDEO (YouTube) */}
-        {/* CONDITIONAL RENDER: Only renders if showVideo is true (Desktop) */}
+        {/* Video only renders on Desktop to save mobile resources */}
         {showVideo && (
           <div className="mt-12">
             <YouTubeScrollVideo
@@ -91,7 +95,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* 5. ZOOM PARALLAX GALLERY */}
         <div className="mt-12">
           <ZoomParallax
             images={[
@@ -106,11 +109,10 @@ export default function Home() {
           />
         </div>
 
-        {/* 6. SPONSORS */}
         <div className="mt-16 pb-20">
           <SponsorsSection />
         </div>
       </div>
-    </>
+    </main>
   );
 }

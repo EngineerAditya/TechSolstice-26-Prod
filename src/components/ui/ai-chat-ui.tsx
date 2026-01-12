@@ -176,7 +176,21 @@ export function MorphChatPanel({ messages, isLoading, onSendMessage, isOpen, set
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              <ColorOrb dimension="32px" tones={{ base: "oklch(60% 0.2 280)" }} />
+              {/* Use robot image from public folder; falls back visually if missing */}
+              <img
+                src="/robot/graident-ai-robot-vectorart.png"
+                alt="Chatbot"
+                className="w-12 h-12 object-contain"
+                onError={(e) => {
+                  // If image fails to load, replace with a simple styled fallback
+                  const target = e.currentTarget
+                  const parent = target.parentElement
+                  if (!parent) return
+                  const fallback = document.createElement('div')
+                  fallback.className = 'w-12 h-12 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-md'
+                  parent.replaceChild(fallback, target)
+                }}
+              />
             </motion.button>
           ) : (
             <motion.div
@@ -189,7 +203,19 @@ export function MorphChatPanel({ messages, isLoading, onSendMessage, isOpen, set
               {/* Minimal Header */}
               <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-4 py-4 bg-gradient-to-b from-white via-white/80 to-transparent dark:from-zinc-950 dark:via-zinc-950/80">
                 <div className="flex items-center gap-2">
-                  <ColorOrb dimension="16px" tones={{ base: "oklch(60% 0.2 280)" }} />
+                  <img
+                    src="/robot/graident-ai-robot-vectorart.png"
+                    alt="Assistant"
+                    className="w-8 h-8 object-contain"
+                    onError={(e) => {
+                      const target = e.currentTarget
+                      const parent = target.parentElement
+                      if (!parent) return
+                      const fallback = document.createElement('div')
+                      fallback.className = 'w-8 h-8 bg-gradient-to-br from-indigo-500 to-pink-500 rounded-md'
+                      parent.replaceChild(fallback, target)
+                    }}
+                  />
                   <span className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Assistant</span>
                 </div>
                 <button

@@ -133,16 +133,16 @@ export async function POST(request: NextRequest) {
 async function handleSimpleEventLookup(query: string, eventNameHint?: string): Promise<string> {
   const supabase = await createClient();
 
-  // Get all event names for fuzzy matching
+  // Get all event names for fuzzy matching and include starts_at/ends_at
   const { data: events, error } = await supabase
     .from('events')
-    .select('id, name, venue, time, date, shortDescription, longDescription, category');
+    .select('id, name, venue, starts_at, ends_at, shortDescription, longDescription, category');
 
   if (error || !events || events.length === 0) {
     return "I couldn't find any events right now. Please try again later or contact support.";
   }
 
-  const eventNames = events.map(e => e.name);
+  const eventNames = events.map((e: any) => e.name);
 
   // Try to find the event using fuzzy matching
   const matchedEventName = eventNameHint
@@ -153,7 +153,7 @@ async function handleSimpleEventLookup(query: string, eventNameHint?: string): P
     return `I couldn't find a specific event matching your query. Here are some available events: ${eventNames.slice(0, 5).join(', ')}. Please be more specific.`;
   }
 
-  const event = events.find(e => e.name === matchedEventName);
+  const event = events.find((e: any) => e.name === matchedEventName);
   if (!event) {
     return "Sorry, I couldn't retrieve the event details. Please try again.";
   }
@@ -163,12 +163,12 @@ async function handleSimpleEventLookup(query: string, eventNameHint?: string): P
 
   // If user asked about time
   if (/\b(?:when|time|timing|schedule)\b/i.test(queryLower)) {
-    return `${event.name} is scheduled on ${formatDate(event.date)} at ${formatTime(event.time)}.`;
+    return `${event.name} is scheduled on ${formatDate(event.starts_at)} at ${formatTime(event.starts_at)}.`;
   }
 
   // If user asked about venue/location
   if (/\b(?:where|venue|location|place)\b/i.test(queryLower)) {
-    return `${event.name} will be held at ${event.venue || 'TBA'} on ${formatDate(event.date)}.`;
+    return `${event.name} will be held at ${event.venue || 'TBA'} on ${formatDate(event.starts_at)}.`;
   }
 
   // If user explicitly asked "what is" or similar, return short description only
@@ -192,15 +192,12 @@ async function handleNextEventQuery(category?: string): Promise<string> {
   const supabase = await createClient();
 
   const now = new Date();
-  const currentDate = now.toISOString().split('T')[0];
-  const currentTime = now.toTimeString().split(' ')[0];
 
   let query = supabase
     .from('events')
     .select('*')
-    .gte('date', currentDate)
-    .order('date', { ascending: true })
-    .order('time', { ascending: true })
+    .gte('starts_at', now.toISOString())
+    .order('starts_at', { ascending: true })
     .limit(1);
 
   if (category) {
@@ -231,7 +228,7 @@ async function handleEventFilter(filterType: string, filterValue?: string): Prom
     query = query.ilike('category', `%${filterValue}%`);
   }
 
-  const { data: events, error } = await query.order('date').order('time');
+  const { data: events, error } = await query.order('starts_at').order('ends_at');
 
   if (error || !events || events.length === 0) {
     return `No events found matching your criteria.`;
@@ -254,8 +251,8 @@ async function handleComplexQuestion(query: string, conversationHistory: Array<{
   const { data: events } = await supabase
     .from('events')
     .select('*')
-    .order('date')
-    .order('time');
+    .order('starts_at')
+    .order('ends_at');
 
   // Get relevant context from vector database (PDF content)
   const vectorContext = await getRelevantContext(query);
@@ -264,12 +261,12 @@ async function handleComplexQuestion(query: string, conversationHistory: Array<{
   let eventsContext = '';
   if (events && events.length > 0) {
     eventsContext = `\n\nAVAILABLE EVENTS AT TECHSOLSTICE:\n`;
-    events.forEach(event => {
+    events.forEach((event: any) => {
       const evLines: string[] = [];
       evLines.push(`${event.name}`);
       if (event.category) evLines.push(`Category: ${event.category}`);
-      evLines.push(`Date: ${event.date || 'TBA'}`);
-      evLines.push(`Time: ${event.time || 'TBA'}`);
+      evLines.push(`Date: ${formatDate(event.starts_at)}`);
+      evLines.push(`Time: ${formatTime(event.starts_at)}`);
       evLines.push(`Venue: ${event.venue || 'TBA'}`);
       if (event.shortDescription) evLines.push(`Description: ${event.shortDescription}`);
       if (event.prize_pool) evLines.push(`Prize Pool: ₹${event.prize_pool}`);
@@ -321,13 +318,13 @@ ${vectorContext ? `\nADDITIONAL INFORMATION FROM RULES & GUIDELINES:\n${vectorCo
  */
 function formatEventInfo(event: any, short: boolean = false): string {
   if (short) {
-    return `- ${event.name} - ${formatDate(event.date)} at ${formatTime(event.time)} | ${event.venue || 'TBA'}`;
+    return `- ${event.name} - ${formatDate(event.starts_at)} at ${formatTime(event.starts_at)} | ${event.venue || 'TBA'}`;
   }
 
   const lines = [];
   lines.push(`${event.name}`);
-  lines.push(`Date: ${formatDate(event.date)}`);
-  lines.push(`Time: ${formatTime(event.time)}`);
+  lines.push(`Date: ${formatDate(event.starts_at)}`);
+  lines.push(`Time: ${formatTime(event.starts_at)}`);
   lines.push(`Venue: ${event.venue || 'TBA'}`);
   lines.push(`${event.shortDescription || event.longDescription || 'More details coming soon!'}`);
   return lines.join('\n');
@@ -339,7 +336,11 @@ function formatEventInfo(event: any, short: boolean = false): string {
 function formatDate(date: string | null): string {
   if (!date) return 'TBA';
   const d = new Date(date);
-  return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  try {
+    return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  } catch {
+    return String(date);
+  }
 }
 
 /**
@@ -347,5 +348,10 @@ function formatDate(date: string | null): string {
  */
 function formatTime(time: string | null): string {
   if (!time) return 'TBA';
-  return time;
+  const d = new Date(time);
+  try {
+    return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  } catch {
+    return String(time);
+  }
 }

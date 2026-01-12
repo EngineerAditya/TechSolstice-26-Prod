@@ -30,7 +30,8 @@ const EventsPage = () => {
   return (
     <div className="min-h-screen w-full relative">
       {/* Hero Section - Fixed height to prevent CLS */}
-      <div className="relative min-h-[400px] md:min-h-[500px] lg:min-h-[600px] px-4 z-10 bg-black/10 flex items-center justify-center py-20">
+      {/* Removed bg-black/10 to ensure tint is only on cards */}
+      <div className="relative min-h-[400px] md:min-h-[500px] lg:min-h-[600px] px-4 z-10 flex items-center justify-center py-20">
 
         {/* Content */}
         <div className="relative z-10 max-w-7xl mx-auto text-center">
@@ -47,7 +48,8 @@ const EventsPage = () => {
       </div>
 
       {/* Categories Grid - Fixed heights to prevent CLS */}
-      <div className="max-w-6xl mx-auto px-4 pb-32 relative z-10 bg-black/10">
+      {/* Removed bg-black/10 here as requested */}
+      <div className="max-w-6xl mx-auto px-4 pb-32 relative z-10">
         {/* Reserve space for exact card dimensions */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {EVENT_CATEGORIES.map((category, index) => (
