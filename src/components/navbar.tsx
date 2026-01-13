@@ -8,6 +8,7 @@ const navItems = [
   { name: "Events", url: "/events", icon: Calendar },
   { name: "Passes", url: "/passes", icon: Ticket },
   { name: "Profile", url: "/profile", icon: User },
+  { name: "Help", url: "/help", icon: Mail },
 ];
 
 // Always render the navbar; the visual is fixed/sticky in `NavBar` itself.
