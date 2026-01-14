@@ -3,37 +3,34 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { HeroRobot } from "../components/hero-robot";
-import FestInfo from "@/components/ui/fest-info"; // Keep static
+import FestInfo from "@/components/ui/fest-info";
 import LoadingScreen from "../components/loading-screen";
 import ReactDOM from "react-dom";
 
-// --- DYNAMIC IMPORTS (Fixed for Named Exports) ---
+// --- DYNAMIC IMPORTS (Fixed for correct Export Types) ---
 
-// 1. SpeakerShowcase
-const SpeakerShowcase = dynamic(
-  () => import("@/components/ui/speaker-showcase").then((mod) => mod.default || mod.SpeakerShowcase),
-  { ssr: true }
-);
+// 1. SpeakerShowcase (Default Export)
+const SpeakerShowcase = dynamic(() => import("@/components/ui/speaker-showcase"), {
+  ssr: true,
+});
 
-// 2. ScrollPathAnimation (The one that caused the error)
+// 2. ScrollPathAnimation (Named Export)
 const ScrollPathAnimation = dynamic(
   () => import("@/components/ui/scroll-path-animation").then((mod) => mod.ScrollPathAnimation),
   { ssr: false }
 );
 
-// 3. YouTubeScrollVideo (Likely default export, but explicit check handles both)
-const YouTubeScrollVideo = dynamic(
-  () => import("@/components/ui/youtube-scroll-video").then((mod) => mod.default || mod.YouTubeScrollVideo),
-  { ssr: false }
-);
+// 3. YouTubeScrollVideo (Default Export)
+const YouTubeScrollVideo = dynamic(() => import("@/components/ui/youtube-scroll-video"), {
+  ssr: false,
+});
 
-// 4. ZoomParallax (Likely default export, but explicit check handles both)
-const ZoomParallax = dynamic(
-  () => import("@/components/ui/zoom-parallax").then((mod) => mod.default || mod.ZoomParallax),
-  { ssr: false }
-);
+// 4. ZoomParallax (Default Export)
+const ZoomParallax = dynamic(() => import("@/components/ui/zoom-parallax"), {
+  ssr: false,
+});
 
-// 5. SponsorsSection
+// 5. SponsorsSection (Named Export)
 const SponsorsSection = dynamic(
   () => import("@/components/sponsors-section").then((mod) => mod.SponsorsSection),
   { ssr: true }
