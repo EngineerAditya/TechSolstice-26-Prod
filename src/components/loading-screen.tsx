@@ -1,113 +1,102 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Logo from "@/components/ui/logo";
-import { motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
-interface LoadingScreenProps {
-  onLoadingComplete: () => void;
-  minDuration?: number;
-}
-
-export function LoadingScreen({ onLoadingComplete, minDuration = 2000 }: LoadingScreenProps) {
-  const [progress, setProgress] = useState(0);
-  const [isComplete, setIsComplete] = useState(false);
+export default function LoadingScreen({ fadeOut = false }) {
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    // --- THE NUCLEAR SCROLL LOCK ---
+    setMounted(true);
 
-    // 1. Target both HTML and BODY
-    const html = document.documentElement;
-    const body = document.body;
-
-    // 2. Save original values (good practice, though we reset to empty usually)
-    const originalHtmlOverflow = html.style.overflow;
-    const originalBodyOverflow = body.style.overflow;
-    const originalBodyHeight = body.style.height;
-
-    // 3. Apply the Lock
-    // We lock HTML to prevent the "rubber band" effect
-    html.style.overflow = "hidden";
-    // We lock Body and force it to visual viewport height
-    body.style.overflow = "hidden";
-    body.style.height = "100vh";
-    // This stops mobile touch dragging
-    body.style.touchAction = "none";
-
-    // Simple simulated loading progress
-    const startTime = Date.now();
-    const interval = setInterval(() => {
-      setProgress((prev) => {
-        const next = prev + Math.random() * 15;
-        if (next >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return next;
-      });
-    }, 150);
-
-    const timeout = setTimeout(() => {
-      setProgress(100);
-      setIsComplete(true);
-      setTimeout(() => {
-        // --- UNLOCK EVERYTHING ---
-        html.style.overflow = originalHtmlOverflow;
-        body.style.overflow = originalBodyOverflow;
-        body.style.height = originalBodyHeight;
-        body.style.touchAction = "";
-
-        onLoadingComplete();
-      }, 500);
-    }, minDuration);
+    // Scroll Lock
+    if (!fadeOut) {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+      window.scrollTo(0, 0);
+    } else {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
 
     return () => {
-      clearInterval(interval);
-      clearTimeout(timeout);
-      // Safety cleanup in case component unmounts unexpectedly
-      html.style.overflow = originalHtmlOverflow;
-      body.style.overflow = originalBodyOverflow;
-      body.style.height = originalBodyHeight;
-      body.style.touchAction = "";
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
     };
-  }, [minDuration, onLoadingComplete]);
+  }, [fadeOut]);
 
-  if (isComplete) return null;
+  // Don't render anything on the server (hydration mismatch prevention)
+  if (!mounted) return null;
 
-  return (
-    // Z-INDEX 999999 ensures it is above your Navbar (which is likely z-50 or z-100)
-    // overscroll-none prevents the browser bounce effect
-    <div
-      className={`fixed inset-0 z-[999999] flex flex-col items-center justify-center bg-black transition-opacity duration-500 overscroll-none touch-none ${isComplete ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
-    >
-      {/* Cyberpunk Grid Background */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(18,18,18,0)_1px,transparent_1px),linear-gradient(90deg,rgba(18,18,18,0)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)] opacity-20 pointer-events-none" />
+  // The actual Loader UI
+  const loaderContent = (
+    <>
+      <style>{`
+        .loader-wrapper {
+          position: fixed;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #000;
+          z-index: 2147483647; /* Maximum Z-Index */
+          opacity: 1;
+          visibility: visible;
+          transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), visibility 1.2s step-end;
+        }
 
-      <div className="relative z-10 flex flex-col items-center">
-        <Logo variant="stacked" />
+        .loader-wrapper.fade-out {
+          opacity: 0;
+          visibility: hidden;
+          pointer-events: none;
+        }
 
-        <p className="font-mono text-red-500/80 text-xs tracking-[0.3em] animate-pulse mt-3">
-          SYSTEM_INITIALIZING...
-        </p>
+        .tech-text {
+          font-family: 'Michroma', sans-serif;
+          font-size: clamp(2rem, 5vw, 5rem);
+          font-weight: 900;
+          letter-spacing: -2px;
+          text-transform: uppercase;
+          
+          background: linear-gradient(
+            135deg, 
+            #4a0417 0%,   
+            #7D0D2C 30%,  
+            #ff1a1a 50%,  
+            #7D0D2C 70%,  
+            #4a0417 100%  
+          );
+          background-size: 200% auto;
+          -webkit-background-clip: text;
+          background-clip: text;
+          color: transparent;
+          
+          animation: shine 3s linear infinite, scaleIn 1.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
 
-        {/* Cyberpunk Progress Bar */}
-        <div className="mt-10 w-64 h-1 bg-neutral-900 relative overflow-hidden">
-          <motion.div
-            className="absolute top-0 bottom-0 left-0 shadow-[0_0_15px_rgba(125,13,44,0.8)]"
-            style={{ backgroundColor: "#7D0D2C" }}
-            initial={{ width: "0%" }}
-            animate={{ width: `${progress}%` }}
-            transition={{ ease: "linear" }}
-          />
-        </div>
+        @keyframes shine {
+          to {
+            background-position: 200% center;
+          }
+        }
 
-        {/* Percentage Counter */}
-        <div className="mt-2 w-64 flex justify-between font-mono text-[10px] text-neutral-500">
-          <span>LOADING_ASSETS</span>
-          <span className="text-red-500">{Math.round(progress)}%</span>
+        @keyframes scaleIn {
+          0% { transform: scale(0.95); opacity: 0; filter: blur(10px); }
+          100% { transform: scale(1); opacity: 1; filter: blur(0px); }
+        }
+      `}</style>
+
+      <div
+        className={`loader-wrapper ${fadeOut ? "fade-out" : ""}`}
+        style={{ pointerEvents: fadeOut ? "none" : "all" }}
+      >
+        <div className="tech-text">
+          TechSolstice'26
         </div>
       </div>
-    </div>
+    </>
   );
+
+  // Magic: Render directly into the document body, bypassing all Layout nesting
+  return createPortal(loaderContent, document.body);
 }

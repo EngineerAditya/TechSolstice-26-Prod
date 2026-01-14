@@ -7,25 +7,28 @@ import { ScrollPathAnimation } from "@/components/ui/scroll-path-animation";
 import ZoomParallax from "@/components/ui/zoom-parallax";
 import FestInfo from "@/components/ui/fest-info";
 import SpeakerShowcase from "@/components/ui/speaker-showcase";
-import { LoadingScreen } from "../components/loading-screen";
+import LoadingScreen from "../components/loading-screen"; // Default import
 import { SponsorsSection } from "@/components/sponsors-section";
 
 export default function Home() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [showVideo, setShowVideo] = useState(false);
 
   useEffect(() => {
     // 1. Desktop Check for Video
     const checkDesktop = () => {
-      // 768px matches Tailwind's 'md' breakpoint
       setShowVideo(window.innerWidth >= 768);
     };
 
-    // Run immediately and on resize
     checkDesktop();
     window.addEventListener("resize", checkDesktop);
 
-    // 2. Smooth Scroll Logic (Lenis)
+    // 2. Loading Timer
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2500);
+
+    // 3. Smooth Scroll Logic (Lenis)
     let lenis: any;
     let rafId: number;
 
@@ -52,30 +55,31 @@ export default function Home() {
 
     return () => {
       window.removeEventListener("resize", checkDesktop);
+      clearTimeout(timer);
       if (rafId) cancelAnimationFrame(rafId);
       if (lenis) lenis.destroy();
     };
   }, []);
 
-  const handleLoadingComplete = () => {
-    setIsLoading(false);
-  };
-
   return (
+    // Removed bg-black to ensure HeroRobot background is visible
     <main className="min-h-screen w-full">
-      {isLoading && <LoadingScreen onLoadingComplete={handleLoadingComplete} minDuration={2000} />}
 
+      <LoadingScreen fadeOut={!loading} />
+
+      {/* Content is rendered immediately but hidden via opacity.
+        No overflow-hidden on the div itself to avoid scrollbar layout shift.
+      */}
       <div
-        className={`w-full transition-opacity duration-700 ${isLoading ? "opacity-0" : "opacity-100"}`}
+        className={`w-full transition-opacity duration-[1500ms] cubic-bezier(0.22, 1, 0.36, 1) ${loading ? "opacity-0 h-screen overflow-hidden" : "opacity-100"
+          }`}
       >
         <HeroRobot />
 
-        {/* FestInfo with conditional background if needed, currently kept standard */}
         <div className="relative z-10 mt-0 md:-mt-1 bg-black">
           <FestInfo />
         </div>
 
-        {/* Speaker showcase - placed after FestInfo and before ScrollPathAnimation */}
         <div className="mt-8">
           <SpeakerShowcase />
         </div>
@@ -84,7 +88,6 @@ export default function Home() {
           <ScrollPathAnimation />
         </div>
 
-        {/* Video only renders on Desktop to save mobile resources */}
         {showVideo && (
           <div className="mt-12">
             <YouTubeScrollVideo
