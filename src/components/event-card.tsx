@@ -3,7 +3,7 @@
 import { useState } from "react";
 import ExpandableCard from "@/components/ui/expandable-card";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Trophy, CheckCircle2, Lock, Hourglass } from "lucide-react";
+import { Calendar, Clock, MapPin, Trophy, CheckCircle2, Lock, Hourglass, Users } from "lucide-react";
 import TeamRegistrationForm from "@/components/ui/TeamRegistrationForm";
 import TeamDashboard from "@/components/ui/TeamDashboard";
 
@@ -48,6 +48,14 @@ export function EventCard({ event, isRegistered, hasAccess }: EventCardProps) {
     ? new Date(event.starts_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })
     : "TBA";
 
+  // LOGIC: Team Size Display
+  const teamSizeDisplay =
+    event.min_team_size === event.max_team_size
+      ? event.min_team_size === 1
+        ? "Solo"
+        : `${event.min_team_size}`
+      : `${event.min_team_size}-${event.max_team_size}`;
+
   let buttonText = "Register Now";
   let buttonIcon = null;
   let isDisabled = false;
@@ -74,38 +82,52 @@ export function EventCard({ event, isRegistered, hasAccess }: EventCardProps) {
       title={event.name}
       description=""
       isFlipped={isFlipped}
-      // THEME UPDATE: Pure minimalist black. No blur/noise. Sharp hairlines.
-      className="w-full h-full bg-black border border-white/10 hover:border-red-500/50 transition-colors duration-300 group rounded-lg"
+      // THEME UPDATE: Pitch black, sharp borders, red hover. 
+      // Added min-h-[340px] to give it more physical estate to breathe.
+      className="w-full h-full min-h-[340px] bg-black border border-white/10 hover:border-red-500/50 transition-colors duration-300 group rounded-lg"
       collapsedChildren={
-        <div className="space-y-4 w-full">
-          {/* Meta Grid - Dividers instead of boxes */}
-          <div className="grid grid-cols-3 divide-x divide-white/10 border-t border-white/10 pt-4 w-full">
-            <div className="flex flex-col items-center gap-1 px-1">
-              <span className="text-neutral-500 text-[9px] uppercase tracking-widest">Date</span>
-              <span className="text-neutral-200 text-[10px] sm:text-xs font-medium truncate w-full text-center">
+        <div className="space-y-5 w-full">
+          {/* Meta Grid - Updated to 4 Columns to fit Team Size comfortably */}
+          <div className="grid grid-cols-4 divide-x divide-white/10 border-t border-white/10 pt-5 w-full">
+            <div className="flex flex-col items-center gap-1.5 px-1">
+              {/* Increased label size: text-[10px] */}
+              <span className="text-neutral-500 text-[10px] uppercase tracking-widest">Date</span>
+              {/* Increased value size: text-xs sm:text-sm */}
+              <span className="text-neutral-200 text-xs sm:text-sm font-medium truncate w-full text-center">
                 {eventDate}
               </span>
             </div>
-            <div className="flex flex-col items-center gap-1 px-1">
-              <span className="text-neutral-500 text-[9px] uppercase tracking-widest">Time</span>
-              <span className="text-neutral-200 text-[10px] sm:text-xs font-medium truncate w-full text-center">
+            <div className="flex flex-col items-center gap-1.5 px-1">
+              <span className="text-neutral-500 text-[10px] uppercase tracking-widest">Time</span>
+              <span className="text-neutral-200 text-xs sm:text-sm font-medium truncate w-full text-center">
                 {eventTime}
               </span>
             </div>
-            <div className="flex flex-col items-center gap-1 px-1">
-              <span className="text-neutral-500 text-[9px] uppercase tracking-widest">Venue</span>
-              <span className="text-neutral-200 text-[10px] sm:text-xs font-medium truncate w-full text-center" title={event.venue || "TBA"}>
+            {/* New Team Size Column */}
+            <div className="flex flex-col items-center gap-1.5 px-1">
+              <span className="text-neutral-500 text-[10px] uppercase tracking-widest">Team</span>
+              <div className="flex items-center gap-1">
+                <Users size={12} className="text-red-500/80" />
+                <span className="text-neutral-200 text-xs sm:text-sm font-medium truncate w-full text-center">
+                  {teamSizeDisplay}
+                </span>
+              </div>
+            </div>
+            <div className="flex flex-col items-center gap-1.5 px-1">
+              <span className="text-neutral-500 text-[10px] uppercase tracking-widest">Venue</span>
+              <span className="text-neutral-200 text-xs sm:text-sm font-medium truncate w-full text-center" title={event.venue || "TBA"}>
                 {event.venue || "TBA"}
               </span>
             </div>
           </div>
 
           {/* Prize Pool - Minimal Text Only */}
-          <div className="flex items-center justify-center pt-1">
+          <div className="flex items-center justify-center pt-2">
             {event.prize_pool && (
               <div className="flex items-baseline gap-2 text-red-500">
-                <Trophy size={10} className="opacity-80" />
-                <span className="text-[11px] font-mono font-bold tracking-tight">
+                <Trophy size={12} className="opacity-80" />
+                {/* Increased Prize Font */}
+                <span className="text-xs sm:text-sm font-mono font-bold tracking-tight">
                   ₹{event.prize_pool}
                 </span>
               </div>
@@ -155,34 +177,46 @@ export function EventCard({ event, isRegistered, hasAccess }: EventCardProps) {
         )
       }
     >
-      <div className="flex flex-col items-center justify-start sm:justify-center space-y-6 w-full h-full py-4">
+      <div className="flex flex-col items-center justify-start sm:justify-center space-y-8 w-full h-full py-6">
 
         {/* Prize Pool - Sharp Industrial Look */}
         {event.prize_pool && (
-          <div className="flex items-center gap-3 px-4 py-2 border border-red-900/30 rounded-md bg-red-950/5">
-            <Trophy size={14} className="text-red-500" />
-            <div className="w-px h-3 bg-red-900/30"></div>
+          <div className="flex items-center gap-3 px-5 py-2.5 border border-red-900/30 rounded-md bg-red-950/5">
+            <Trophy size={18} className="text-red-500" />
+            <div className="w-px h-4 bg-red-900/30"></div>
             <span className="text-sm sm:text-base font-bold text-red-100 font-mono tracking-tight">₹{event.prize_pool}</span>
           </div>
         )}
 
-        {/* Meta Grid - Clean Dividers, No Boxes */}
-        <div className="grid grid-cols-3 w-full divide-x divide-white/10 mt-2">
-          <div className="flex flex-col items-center justify-center px-2 gap-1">
-            <p className="text-[9px] text-neutral-600 uppercase tracking-[0.2em]">Date</p>
-            <p className="text-xs sm:text-sm font-medium text-neutral-200 text-center">
+        {/* Meta Grid - 4 Columns */}
+        <div className="grid grid-cols-4 w-full divide-x divide-white/10 mt-2">
+          <div className="flex flex-col items-center justify-center px-2 gap-2">
+            {/* Increased label size: text-[10px] sm:text-xs */}
+            <p className="text-[10px] sm:text-xs text-neutral-600 uppercase tracking-[0.2em]">Date</p>
+            {/* Increased value size: text-sm sm:text-base */}
+            <p className="text-sm sm:text-base font-medium text-neutral-200 text-center">
               {eventDate}
             </p>
           </div>
-          <div className="flex flex-col items-center justify-center px-2 gap-1">
-            <p className="text-[9px] text-neutral-600 uppercase tracking-[0.2em]">Time</p>
-            <p className="text-xs sm:text-sm font-medium text-neutral-200 text-center">
+          <div className="flex flex-col items-center justify-center px-2 gap-2">
+            <p className="text-[10px] sm:text-xs text-neutral-600 uppercase tracking-[0.2em]">Time</p>
+            <p className="text-sm sm:text-base font-medium text-neutral-200 text-center">
               {eventTime}
             </p>
           </div>
-          <div className="flex flex-col items-center justify-center px-2 gap-1">
-            <p className="text-[9px] text-neutral-600 uppercase tracking-[0.2em]">Venue</p>
-            <p className="text-xs sm:text-sm font-medium text-neutral-200 truncate w-full text-center px-1" title={event.venue || "TBA"}>
+          {/* Expanded Team Column */}
+          <div className="flex flex-col items-center justify-center px-2 gap-2">
+            <p className="text-[10px] sm:text-xs text-neutral-600 uppercase tracking-[0.2em]">Team</p>
+            <div className="flex items-center gap-1.5">
+              <Users size={16} className="text-red-500" />
+              <p className="text-sm sm:text-base font-medium text-neutral-200 text-center">
+                {teamSizeDisplay}
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-col items-center justify-center px-2 gap-2">
+            <p className="text-[10px] sm:text-xs text-neutral-600 uppercase tracking-[0.2em]">Venue</p>
+            <p className="text-sm sm:text-base font-medium text-neutral-200 truncate w-full text-center px-1" title={event.venue || "TBA"}>
               {event.venue || "TBA"}
             </p>
           </div>
@@ -191,7 +225,7 @@ export function EventCard({ event, isRegistered, hasAccess }: EventCardProps) {
         {/* Description - Left Aligned with Red Accent Line */}
         {event.longDescription && (
           <div className="w-full px-4 sm:px-6">
-            <div className="border-l-2 border-red-500/50 pl-4 py-1">
+            <div className="border-l-2 border-red-500/50 pl-4 py-2">
               <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed line-clamp-4 text-left">
                 {event.longDescription}
               </p>
@@ -201,23 +235,23 @@ export function EventCard({ event, isRegistered, hasAccess }: EventCardProps) {
 
         {/* STATUS BADGES - Outlines Only */}
         {(isRegistered || isPassLocked || (isLocked && !isRegistered && !isComingSoon)) && (
-          <div className="flex flex-wrap gap-2 justify-center pt-2">
+          <div className="flex flex-wrap gap-3 justify-center pt-4">
             {isRegistered && (
-              <div className="flex items-center gap-2 px-3 py-1 rounded border border-white/30">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded border border-white/30">
                 <CheckCircle2 className="text-white" size={12} />
                 <span className="text-white font-medium text-[10px] uppercase tracking-wider">Registered</span>
               </div>
             )}
 
             {isPassLocked && (
-              <div className="flex items-center gap-2 px-3 py-1 rounded border border-red-500/40">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded border border-red-500/40">
                 <Lock className="text-red-500" size={12} />
                 <span className="text-red-400 font-medium text-[10px] uppercase tracking-wider">Pass Required</span>
               </div>
             )}
 
             {isLocked && !isRegistered && !isComingSoon && (
-              <div className="flex items-center gap-2 px-3 py-1 rounded border border-neutral-700">
+              <div className="flex items-center gap-2 px-3 py-1.5 rounded border border-neutral-700">
                 <Lock className="text-neutral-500" size={12} />
                 <span className="text-neutral-500 font-medium text-[10px] uppercase tracking-wider">Closed</span>
               </div>
