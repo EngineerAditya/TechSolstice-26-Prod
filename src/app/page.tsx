@@ -3,67 +3,71 @@
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { HeroRobot } from "../components/hero-robot";
-import FestInfo from "@/components/ui/fest-info"; // Keep this static for immediate scroll availability
+import FestInfo from "@/components/ui/fest-info"; // Keep static
 import LoadingScreen from "../components/loading-screen";
 import ReactDOM from "react-dom";
 
-// --- DYNAMIC IMPORTS (Resource Optimization) ---
-// These components are heavy. We load them only when needed (Lazy Loading).
-// This reduces the initial JavaScript bundle size significantly (Better FCP).
+// --- DYNAMIC IMPORTS (Fixed for Named Exports) ---
 
-const SpeakerShowcase = dynamic(() => import("@/components/ui/speaker-showcase"), {
-  ssr: true, // Keep SSR for SEO
-});
+// 1. SpeakerShowcase
+const SpeakerShowcase = dynamic(
+  () => import("@/components/ui/speaker-showcase").then((mod) => mod.default || mod.SpeakerShowcase),
+  { ssr: true }
+);
 
-const ScrollPathAnimation = dynamic(() => import("@/components/ui/scroll-path-animation"), {
-  ssr: false, // Animation heavy, client only is fine
-});
+// 2. ScrollPathAnimation (The one that caused the error)
+const ScrollPathAnimation = dynamic(
+  () => import("@/components/ui/scroll-path-animation").then((mod) => mod.ScrollPathAnimation),
+  { ssr: false }
+);
 
-const YouTubeScrollVideo = dynamic(() => import("@/components/ui/youtube-scroll-video"), {
-  ssr: false,
-});
+// 3. YouTubeScrollVideo (Likely default export, but explicit check handles both)
+const YouTubeScrollVideo = dynamic(
+  () => import("@/components/ui/youtube-scroll-video").then((mod) => mod.default || mod.YouTubeScrollVideo),
+  { ssr: false }
+);
 
-const ZoomParallax = dynamic(() => import("@/components/ui/zoom-parallax"), {
-  ssr: false,
-});
+// 4. ZoomParallax (Likely default export, but explicit check handles both)
+const ZoomParallax = dynamic(
+  () => import("@/components/ui/zoom-parallax").then((mod) => mod.default || mod.ZoomParallax),
+  { ssr: false }
+);
 
-// Handle Named Export for SponsorsSection
-const SponsorsSection = dynamic(() =>
-  import("@/components/sponsors-section").then((mod) => mod.SponsorsSection)
+// 5. SponsorsSection
+const SponsorsSection = dynamic(
+  () => import("@/components/sponsors-section").then((mod) => mod.SponsorsSection),
+  { ssr: true }
 );
 
 export default function Home() {
   const [loading, setLoading] = useState(true);
-  const [isReady, setIsReady] = useState(false); // Controls mounting of heavy components
+  const [isReady, setIsReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
 
-  // PRELOAD CRITICAL ASSETS
   useEffect(() => {
-    // Manually signal to browser to prioritize the ASMR background if it's an image
-    // If it's pure CSS (which ASMR usually is), this logic ensures the main thread focuses on HeroRobot first.
-    ReactDOM.preload("/fonts/Michroma-Regular.ttf", { as: "font" }); // Example if you serve local fonts
+    // Attempt to preload font if available
+    // @ts-ignore
+    if (typeof ReactDOM.preload === 'function') {
+      // @ts-ignore
+      ReactDOM.preload("/fonts/Michroma-Regular.ttf", { as: "font" });
+    }
   }, []);
 
   useEffect(() => {
-    // 1. Desktop Check for Video
     const checkDesktop = () => {
       setShowVideo(window.innerWidth >= 768);
     };
     checkDesktop();
     window.addEventListener("resize", checkDesktop);
 
-    // 2. Loading Sequence
-    // We allow the loader to run for 2.5s.
-    // We set isReady slightly earlier so components can mount in the background just before reveal.
     const readyTimer = setTimeout(() => {
-      setIsReady(true); // Mount heavy components
+      setIsReady(true);
     }, 2000);
 
     const finishTimer = setTimeout(() => {
-      setLoading(false); // Fade out loader
+      setLoading(false);
     }, 2500);
 
-    // 3. Smooth Scroll Logic (Lenis)
     let lenis: any;
     let rafId: number;
 
@@ -99,26 +103,14 @@ export default function Home() {
 
   return (
     <main className="min-h-screen w-full relative">
-      {/* Portal Loader 
-        fadeOut={!loading} triggers the CSS transition in the portal.
-      */}
       <LoadingScreen fadeOut={!loading} />
 
-      {/* HERO SECTION (Critical LCP)
-        We render this IMMEDIATELY. We do NOT hide it with opacity-0.
-        It sits behind the black loader. This allows the browser to paint it 
-        and run the heavy 3D instantiation while the user watches the "System Initializing" text.
-        This solves the LCP issue.
-      */}
+      {/* Critical LCP Element - Rendered Immediately */}
       <div className="relative z-0">
         <HeroRobot />
       </div>
 
-      {/* BELOW THE FOLD (Resource Saving)
-        We wrap the heavy rest-of-page content in a conditional or transition.
-        It only mounts when `isReady` is true (2 seconds in).
-        This ensures the initial page load only processes the Hero + Loader.
-      */}
+      {/* Below Fold Content - Lazy Loaded */}
       {isReady && (
         <div className="animate-in fade-in slide-in-from-bottom-10 duration-1000 fill-mode-forwards">
 
