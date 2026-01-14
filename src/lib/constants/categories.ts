@@ -54,7 +54,7 @@ export const EVENT_CATEGORIES: EventCategory[] = [
     title: "Gaming Zone",
     slug: "gaming-zone",
     dbValue: "Gaming Zone",
-    description: "Valorant, FIFA, and Tekken tournaments for ultimate bragging rights.",
+    description: "Valorant, FIFA, and ESports tournaments for ultimate bragging rights.",
     gradient: "from-indigo-500 via-blue-500 to-cyan-500",
   },
   {

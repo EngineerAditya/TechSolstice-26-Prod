@@ -4,8 +4,6 @@ import * as React from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
-import ASMRStaticBackground from "./asmr-static-background";
-
 
 interface ExpandableCardProps {
   title: string;
@@ -63,13 +61,13 @@ export function ExpandableCard({
     <AnimatePresence>
       {active && (
         <>
-          {/* Backdrop - click to close */}
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setActive(false)}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md z-99999"
+            className="fixed inset-0 bg-black/95 backdrop-blur-sm z-[9999]"
           />
 
           {/* Card Container */}
@@ -77,12 +75,12 @@ export function ExpandableCard({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 flex items-center justify-center z-99999 pointer-events-none"
+            className="fixed inset-0 flex items-center justify-center z-[9999] pointer-events-none"
             style={{
-              paddingTop: "calc(env(safe-area-inset-top, 0px) + 80px)",
-              paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 32px)",
-              paddingLeft: "calc(env(safe-area-inset-left, 0px) + 16px)",
-              paddingRight: "calc(env(safe-area-inset-right, 0px) + 16px)",
+              paddingTop: "calc(env(safe-area-inset-top, 0px) + 40px)",
+              paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 20px)",
+              paddingLeft: "16px",
+              paddingRight: "16px",
             }}
           >
             <motion.div
@@ -90,103 +88,86 @@ export function ExpandableCard({
               ref={cardRef}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "w-full max-w-[90vw] sm:max-w-[85vw] md:max-w-[75vw] lg:max-w-175 h-[85vh] relative perspective-[1000px] pointer-events-auto",
+                "w-full max-w-[800px] h-[80vh] relative perspective-[1000px] pointer-events-auto",
                 classNameExpanded
               )}
-
               {...props}
             >
-              {/* 3D flip wrapper */}
-
               <div
-                className="absolute inset-0 bg-black/40 backdrop-blur-md rounded-3xl transition-transform duration-500 ease-out border border-white/10 shadow-2xl"
+                className="absolute inset-0 bg-neutral-950 border border-white/10 rounded-xl shadow-2xl overflow-hidden"
                 style={{
                   transformStyle: "preserve-3d",
                   transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)",
+                  transition: "transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)",
                 }}
               >
+                {/* Tech Grid Background Pattern for Expanded State */}
+                <div className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+                  style={{
+                    backgroundImage: 'linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px)',
+                    backgroundSize: '40px 40px'
+                  }}
+                />
 
                 {/* FRONT face */}
                 <div
-                  className="absolute inset-0 rounded-3xl shadow-2xl border border-white/10 overflow-hidden flex flex-col bg-black/40 backdrop-blur-md"
+                  className="absolute inset-0 flex flex-col bg-neutral-950/80 backdrop-blur-md"
                   style={{ backfaceVisibility: "hidden" }}
                 >
-                  <ASMRStaticBackground />
-                  {/* Image Section - only show if src exists */}
-                  {src && (
-                    <motion.div layoutId={`image-${title}-${id}`}>
-                      <div className="relative">
+                  {/* Expanded Header */}
+                  <div className="relative border-b border-white/10 bg-neutral-900/50 p-6 flex justify-between items-start z-10">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-neutral-500 font-mono">System.Active</span>
+                      </div>
+                      <motion.h3
+                        layoutId={`title-${title}-${id}`}
+                        className="michroma-regular font-bold text-white text-2xl tracking-wide"
+                      >
+                        {title}
+                      </motion.h3>
+                    </div>
+                    <button
+                      className="h-8 w-8 flex items-center justify-center rounded border border-white/10 hover:bg-white hover:text-black hover:border-white transition-all duration-200"
+                      onClick={() => setActive(false)}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M1 1L13 13M1 13L13 1" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  {/* Scrollable Content */}
+                  <div className="flex-1 overflow-y-auto overflow-x-hidden p-6 relative z-10 scrollbar-thin scrollbar-track-neutral-950 scrollbar-thumb-neutral-800">
+                    {src && (
+                      <motion.div layoutId={`image-${title}-${id}`} className="mb-6 rounded-lg overflow-hidden border border-white/10">
                         <img
                           src={src}
                           alt={title}
-                          className="w-full h-48 sm:h-56 object-cover object-center"
+                          className="w-full h-48 object-cover opacity-80"
                         />
-                      </div>
-                    </motion.div>
-                  )}
-                  {/* Header + Content */}
-                  <div className="relative flex-1 flex flex-col">
-                    <div className="flex justify-between items-start p-3 sm:p-6">
-                      <div className="flex-1">
-                        <motion.h3
-                          layoutId={`title-${title}-${id}`}
-                          className="michroma-regular font-bold text-white text-xl sm:text-2xl md:text-3xl drop-shadow-sm leading-tight"
-                        >
-                          {title}
-                        </motion.h3>
-                        <motion.p
-                          layoutId={`description-${description}-${id}`}
-                          className="text-zinc-400 text-sm sm:text-base"
-                        >
-                          {description}
-                        </motion.p>
-                      </div>
-
-                      {/* Close button */}
-                      <button
-                        aria-label="Close card"
-                        className="h-10 w-10 shrink-0 flex items-center justify-center rounded-full bg-white/10 text-white hover:bg-white hover:text-black transition-colors duration-300"
-                        onClick={() => setActive(false)}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          width="20"
-                          height="20"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <line x1="18" y1="6" x2="6" y2="18"></line>
-                          <line x1="6" y1="6" x2="18" y2="18"></line>
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Scrollable front content */}
-                    <div className="flex-1 px-3 sm:px-6 pb-3 sm:pb-6 overflow-auto flex items-center justify-center">
-                      <motion.div
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="text-zinc-300 text-sm sm:text-base flex flex-col items-center gap-4 w-full"
-                      >
-                        {children}
                       </motion.div>
-                    </div>
+                    )}
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      {children}
+                    </motion.div>
                   </div>
                 </div>
 
                 {/* BACK face */}
                 <div
-                  className="absolute inset-0 rounded-3xl bg-black/40 backdrop-blur-md shadow-2xl border border-white/10 overflow-hidden flex flex-col"
+                  className="absolute inset-0 bg-neutral-950 flex flex-col z-20"
                   style={{
                     backfaceVisibility: "hidden",
                     transform: "rotateY(180deg)",
                   }}
                 >
-                  <div className="flex-1 overflow-auto px-3 sm:px-6 py-3 sm:py-6">
+                  <div className="flex-1 overflow-auto p-6 scrollbar-thin scrollbar-track-neutral-950 scrollbar-thumb-neutral-800">
                     {backContent}
                   </div>
                 </div>
@@ -202,40 +183,64 @@ export function ExpandableCard({
     <>
       {mounted && createPortal(expandedContent, document.body)}
 
-      {/* Collapsed card */}
+      {/* Collapsed Card - Industrial Module */}
       <motion.div
         layoutId={`card-${title}-${id}`}
         onClick={() => setActive(true)}
         className={cn(
-          "p-5 flex flex-col bg-white/5 hover:bg-white/10 transition-colors shadow-sm rounded-2xl cursor-pointer border border-white/10 min-h-[220px]",
+          "group relative flex flex-col bg-gradient-to-b from-neutral-900 to-black border border-white/10 hover:border-red-500/50 transition-all duration-300 rounded-xl cursor-pointer overflow-hidden",
           className
         )}
       >
-        <div className="flex gap-4 flex-col sm:flex-row items-center sm:items-start flex-1">
-          {src && (
-            <motion.div layoutId={`image-${title}-${id}`} className="w-full sm:w-auto">
-              <img src={src} alt={title} className="w-full sm:w-64 h-40 sm:h-48 rounded-lg object-cover" />
-            </motion.div>
-          )}
+        {/* Subtle Tech Grid Overlay */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none group-hover:opacity-[0.05] transition-opacity"
+          style={{
+            backgroundImage: 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
+            backgroundSize: '20px 20px'
+          }}
+        />
 
-          <div className={`flex-1 ${src ? "text-center sm:text-left" : "text-center"} flex flex-col justify-between h-full`}>
-            <motion.h3
-              layoutId={`title-${title}-${id}`}
-              className="michroma-regular text-white font-semibold text-lg sm:text-xl md:text-2xl mb-4"
-            >
-              {title}
-            </motion.h3>
-            <motion.p
-              layoutId={`description-${description}-${id}`}
-              className="text-zinc-400 text-sm font-medium hidden"
-            >
-              {description}
-            </motion.p>
+        {/* Corner Accents (Top Right & Bottom Left) */}
+        <div className="absolute top-0 right-0 w-8 h-8 border-t border-r border-white/20 rounded-tr-xl pointer-events-none group-hover:border-red-500/50 transition-colors" />
+        <div className="absolute bottom-0 left-0 w-8 h-8 border-b border-l border-white/20 rounded-bl-xl pointer-events-none group-hover:border-red-500/50 transition-colors" />
+
+        <div className="flex flex-col h-full relative z-10">
+
+          {/* Header Section */}
+          <div className="p-5 flex-1 flex flex-col items-center text-center">
+            {/* ID Tag */}
+            <div className="w-full flex justify-between items-center mb-4 opacity-40">
+              <span className="text-[9px] font-mono tracking-widest text-white">EVENT.LOG</span>
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-white rounded-full" />
+                <div className="w-1 h-1 bg-white rounded-full" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="flex-1 flex flex-col justify-center w-full">
+              <motion.h3
+                layoutId={`title-${title}-${id}`}
+                className="michroma-regular text-white font-bold text-lg sm:text-xl tracking-wide group-hover:text-red-500 transition-colors duration-300 drop-shadow-lg"
+              >
+                {title}
+              </motion.h3>
+              <motion.p
+                layoutId={`description-${description}-${id}`}
+                className="hidden"
+              >{description}</motion.p>
+
+              <div className="w-8 h-[2px] bg-red-500/50 mt-4 mx-auto group-hover:w-16 transition-all duration-500" />
+            </div>
           </div>
-        </div>
 
-        {/* Collapsed summary area (meta) */}
-        {collapsedChildren ? <div className="mt-auto pt-3">{collapsedChildren}</div> : null}
+          {/* Footer Section - Distinct Compartment */}
+          {collapsedChildren && (
+            <div className="mt-auto border-t border-white/5 bg-white/[0.02] p-4 backdrop-blur-sm">
+              {collapsedChildren}
+            </div>
+          )}
+        </div>
       </motion.div>
     </>
   );
