@@ -143,6 +143,9 @@ const ASMRStaticBackground: React.FC = () => {
         canvas.style.height = `${height}px`;
         ctx.scale(DPR, DPR);
       }
+      // CRITICAL: Fill with solid black immediately to prevent flash
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, width, height);
     };
 
     const render = () => {
@@ -173,13 +176,20 @@ const ASMRStaticBackground: React.FC = () => {
       }
     };
 
-    const debouncedInit = () => {
-      // small debounce on resize
-      clearTimeout((debouncedInit as any)._t);
-      (debouncedInit as any)._t = setTimeout(() => init(), 150);
+    const handleResize = () => {
+      // Immediately reinitialize and redraw to prevent flash
+      init();
+      // Draw one frame immediately to ensure canvas is never empty
+      ctx.fillStyle = isMobile ? "rgba(25,6,12,0.06)" : "rgba(25,6,12,0.04)";
+      ctx.fillRect(0, 0, width, height);
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.update();
+        p.draw();
+      }
     };
 
-    window.addEventListener("resize", debouncedInit);
+    window.addEventListener("resize", handleResize);
     window.addEventListener("mousemove", handleMouseMove);
     window.addEventListener("touchmove", handleTouchMove, { passive: true });
 
@@ -187,7 +197,7 @@ const ASMRStaticBackground: React.FC = () => {
     render();
 
     return () => {
-      window.removeEventListener("resize", debouncedInit);
+      window.removeEventListener("resize", handleResize);
       window.removeEventListener("mousemove", handleMouseMove);
       window.removeEventListener("touchmove", handleTouchMove as EventListener);
       cancelAnimationFrame(animationFrameId);
@@ -198,6 +208,7 @@ const ASMRStaticBackground: React.FC = () => {
     <div 
       className="fixed inset-0 -z-10 pointer-events-none"
       style={{
+        backgroundColor: '#000000',
         WebkitTapHighlightColor: 'transparent',
         WebkitTouchCallout: 'none',
         userSelect: 'none',
@@ -205,13 +216,15 @@ const ASMRStaticBackground: React.FC = () => {
         touchAction: 'none'
       }}
     >
-      <div className="absolute inset-0">
+      <div className="absolute inset-0" style={{ backgroundColor: '#000000' }}>
         <canvas
           ref={canvasRef}
           className="w-full h-full block absolute inset-0"
           style={{ 
             transform: "translateZ(0)", 
             filter: "blur(9px)",
+            backgroundColor: '#000000',
+            willChange: 'transform',
             WebkitTapHighlightColor: 'transparent',
             userSelect: 'none',
             WebkitUserSelect: 'none',
