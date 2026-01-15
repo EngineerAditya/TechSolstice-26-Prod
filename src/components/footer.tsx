@@ -114,7 +114,7 @@ export const Footer = () => {
             </div>
 
             {/* Social icons - mobile, placed at bottom of contact area */}
-            <div className="flex items-center justify-center gap-4 mt-4">
+            <div className="flex items-center justify-center gap-4 mt-4 pb-[50px]">
               <a
                 href="https://www.linkedin.com/company/techsolstice/"
                 target="_blank"
