@@ -101,7 +101,7 @@ export function EventCard({ event, isRegistered, hasAccess }: EventCardProps) {
       // isFlipped={isFlipped}
       isFlipped={false}
       // THEME UPDATE: Pitch black, sharp borders, red hover. 
-      className="w-full h-full min-h-[340px] bg-black border border-white/10 hover:border-red-500/50 transition-colors duration-300 group rounded-lg"
+      className="w-full h-full min-h-[340px] bg-black border border-white/10 hover:border-[#7a0c0c] transition-colors duration-300 group rounded-lg"
       collapsedChildren={
         <div className="space-y-5 w-full">
           {/* Meta Grid */}
@@ -285,7 +285,7 @@ export function EventCard({ event, isRegistered, hasAccess }: EventCardProps) {
               variant={isRegistered ? "outline" : "default"}
               className={`font-bold text-sm sm:text-base px-8 py-6 w-full sm:w-auto transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed uppercase tracking-wider ${isRegistered
                 ? "border border-white/20 text-white hover:bg-white hover:text-black rounded-none"
-                : "bg-red-600 hover:bg-red-700 text-white border border-transparent rounded-none"
+                : "bg-[#7a0c0c] hover:bg-[#5a0909] text-white border border-transparent rounded-none"
                 }`}
             >
               {buttonIcon}
