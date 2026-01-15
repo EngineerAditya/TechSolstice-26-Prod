@@ -124,7 +124,7 @@ export default function Home() {
           </div>
 
           {showVideo && (
-            <div className="mt-12">
+            <div>
               <YouTubeScrollVideo
                 videoId="comtgOhuXIg"
                 title="TechSolstice'26"
@@ -133,7 +133,7 @@ export default function Home() {
             </div>
           )}
 
-          <div className="mt-12">
+          <div >
             <ZoomParallax
               images={[
                 { src: '/photos/IMG_0162.jpg', alt: 'TechSolstice Crowd' },
