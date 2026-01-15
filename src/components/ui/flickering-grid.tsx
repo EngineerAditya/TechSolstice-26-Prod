@@ -264,25 +264,8 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       setCanvasSize({ width: newWidth, height: newHeight });
       gridParams = setupCanvas(canvas, newWidth, newHeight);
 
-      // Draw static grid immediately after setup for mobile/tablet
-      if (!shouldAnimate) {
-        drawGrid(
-          ctx,
-          canvas.width,
-          canvas.height,
-          gridParams.cols,
-          gridParams.rows,
-          gridParams.squares,
-          gridParams.dpr,
-        );
-      }
-    };
-
-    updateCanvasSize();
-
-    // CRITICAL: Draw initial frame immediately so canvas is visible on mount
-    // This eliminates the pop-in delay when scrolling to footer
-    if (gridParams) {
+      // CRITICAL: Draw initial frame immediately after setup so canvas is visible on mount
+      // This eliminates the pop-in delay when scrolling to footer
       drawGrid(
         ctx,
         canvas.width,
@@ -292,7 +275,9 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
         gridParams.squares,
         gridParams.dpr,
       );
-    }
+    };
+
+    updateCanvasSize();
 
     // Throttle animation to a target FPS to reduce CPU/painter cost during scroll
     const TARGET_FPS = 18;
