@@ -61,7 +61,7 @@ export const Footer = () => {
 
         {/* Mobile Layout (< 768px) */}
         {/* FIXED: Added 'pb-20' to ensure content clears mobile nav bars */}
-        <div className="block md:hidden space-y-6 pb-20">
+        <div className="block md:hidden space-y-6 pb-10">
           {/* Logos Section - Mobile */}
           <div className="space-y-4">
             {/* Horizontal Logos */}
