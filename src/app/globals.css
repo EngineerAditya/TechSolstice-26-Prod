@@ -32,6 +32,11 @@ body {
   background-repeat: no-repeat;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  /* Disable mobile tap highlight and selection */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 /* Full-bleed layout and hidden vertical scrollbar
