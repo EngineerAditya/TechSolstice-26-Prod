@@ -6,25 +6,25 @@ import { analyzeQuery, QueryIntent } from '@/lib/chatbot/analyzer';
 
 export const runtime = 'nodejs';
 
-// 1. DEFINE STOP WORDS
-// If the user says these, they are asking for *attributes*, not *event names*.
-// We remove these before searching the DB to prevent false positives.
-const SEARCH_STOP_WORDS = [
-  'what', 'is', 'the', 'prize', 'pool', 'money', 'cost', 'fee', 'register',
-  'registration', 'venue', 'location', 'where', 'when', 'time', 'date',
-  'schedule', 'team', 'size', 'limit', 'members', 'rules', 'format',
-  'about', 'details', 'tell', 'me', 'how', 'much', 'many'
-];
+// Fallback message
+const FALLBACK_MESSAGE = `I couldn't find that event in my schedule.
+For specific inquiries, please reach out to our Outreach Team:
+**Mahek Sethi**: +91 98219 01461
+**Samaira Malik**: +91 84462 03821`;
 
-function cleanSearchQuery(raw: string): string {
-  const lower = raw.toLowerCase();
-  // Remove special characters
-  const words = lower.replace(/[^\w\s]/gi, '').split(/\s+/);
+// WORDS THAT INDICATE A FOLLOW-UP (Not a new search)
+const GENERIC_WORDS = new Set([
+  'what', 'when', 'where', 'who', 'how', 'is', 'are', 'the', 'a', 'an',
+  'it', 'this', 'that', 'event', 'details', 'about', 'tell', 'me', 'know',
+  'prize', 'pool', 'money', 'cost', 'fee', 'team', 'size', 'limit',
+  'venue', 'location', 'place', 'time', 'date', 'schedule', 'register',
+  'registration', 'rules', 'format', 'contacts', 'contact'
+]);
 
-  // Filter out stop words
-  const keywords = words.filter(w => !SEARCH_STOP_WORDS.includes(w));
-
-  return keywords.join(' ').trim();
+function isFollowUpQuestion(message: string): boolean {
+  const lower = message.toLowerCase();
+  const words = lower.replace(/[^\w\s]/gi, '').split(/\s+/).filter(w => w.length > 0);
+  return words.every(w => GENERIC_WORDS.has(w));
 }
 
 export async function POST(req: NextRequest) {
@@ -37,35 +37,37 @@ export async function POST(req: NextRequest) {
     const lastEventContext = body.activeContext || null;
     sessionId = body.sessionId || 'unknown';
 
-    // Rate Limit & Logging...
+    // 1. SAFETY CHECKS
     if (!rateLimiter.checkLimit(sessionId).allowed) {
-      return NextResponse.json({ response: "You're typing too fast!" }, { status: 429 });
+      return NextResponse.json({ response: "You're typing too fast! Give me a minute." }, { status: 429 });
     }
     await supabase.from('query_logs').insert({ session_id: sessionId, query_text: message, source: 'incoming' });
 
+    // 2. GREETING CHECK (Fast Exit)
+    // This runs BEFORE the database search, so "Hi" returns immediately.
     const analysis = analyzeQuery(message);
-
     if (analysis.intent === QueryIntent.GREETING) {
+      const greetings = [
+        "Hello! I'm Spark. Ask me about any TechSolstice event!",
+        "Hi there! Ready to explore the schedule?",
+        "Hey! I can help you with event details, venues, and times."
+      ];
       return NextResponse.json({
-        response: "Hello! I can help you with event details. What would you like to know?",
-        context: lastEventContext
+        response: greetings[Math.floor(Math.random() * greetings.length)],
+        context: lastEventContext // Keep memory intact
       });
     }
 
-    // 4. THE SMARTER LOOKUP STRATEGY
+    // 3. DECIDE STRATEGY
     let targetedEvent = null;
+    const isFollowUp = isFollowUpQuestion(message);
 
-    // STEP A: Clean the Query
-    // "what is the prize" -> "" (Empty string)
-    // "prize for robo wars" -> "robo wars"
-    const cleanedQuery = cleanSearchQuery(message);
-
-    // STEP B: Search ONLY if we have actual keywords left
-    if (cleanedQuery.length > 2) {
-      // Only search if we have meaningful words (length check prevents searching "ai" or "go")
+    // STRATEGY A: Direct Search
+    // Skip if it's just "When is it?" to avoid matching random events.
+    if (!isFollowUp) {
       const { data: eventMatches } = await supabase.rpc(
         'search_events_fuzzy',
-        { search_query: cleanedQuery } // <--- Search with CLEAN query
+        { search_query: message }
       );
 
       if (eventMatches && eventMatches.length > 0) {
@@ -73,22 +75,20 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // STEP C: Context Fallback
-    // If we didn't find a targeted event (or skipped search because query was empty)
-    // AND we have memory, assume they want details on the active event.
-    if (!targetedEvent && lastEventContext && analysis.intent !== QueryIntent.GENERAL_INFO) {
-      console.log(`Using Context: ${lastEventContext}`);
-
+    // STRATEGY B: Context Fallback
+    if (!targetedEvent && lastEventContext) {
       const { data: contextMatch } = await supabase
         .from('events')
         .select('*')
         .ilike('name', lastEventContext)
         .single();
 
-      if (contextMatch) targetedEvent = contextMatch;
+      if (contextMatch) {
+        targetedEvent = contextMatch;
+      }
     }
 
-    // 5. FETCH AND FORMAT
+    // 4. SUCCESS RESPONSE
     if (targetedEvent) {
       const { data: fullEvent } = await supabase
         .from('events')
@@ -97,21 +97,27 @@ export async function POST(req: NextRequest) {
         .single();
 
       if (fullEvent) {
+        await supabase.from('query_logs').insert({
+          session_id: sessionId,
+          query_text: message,
+          source: `match: ${fullEvent.name}`
+        });
+
         return NextResponse.json({
-          response: formatEventDetails(fullEvent, message), // Pass original message for intent formatting
+          response: formatEventDetails(fullEvent, message),
           context: fullEvent.name
         });
       }
     }
 
-    // 6. FAILURE
+    // 5. FAILURE RESPONSE
     return NextResponse.json({
-      response: "I couldn't find that event. Try asking about a specific event like 'Robowars'!",
+      response: FALLBACK_MESSAGE,
       context: lastEventContext
     });
 
   } catch (e: any) {
     console.error("Server Error:", e);
-    return NextResponse.json({ response: "System error." }, { status: 500 });
+    return NextResponse.json({ response: "System error. Please try again later." }, { status: 500 });
   }
 }
