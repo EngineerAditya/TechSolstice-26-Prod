@@ -16,7 +16,7 @@ export function formatEventDetails(event: any, query: string): string {
 
   const dateStr = event.starts_at ? new Date(event.starts_at).toLocaleDateString('en-IN', dateOptions) : 'Date TBA';
   const timeStr = event.starts_at ? new Date(event.starts_at).toLocaleTimeString('en-IN', timeOptions) : 'Time TBA';
-  const venueStr = event.venue || 'Venue to be announced';
+  const venueStr = event.venue || '';
   const prizeStr = event.prize_pool || 'Prize details coming soon';
 
   // 3. Return Context-Specific Answer
@@ -25,7 +25,8 @@ export function formatEventDetails(event: any, query: string): string {
       return `**${event.name}** is scheduled for **${dateStr}** at **${timeStr}**.`;
 
     case 'venue':
-      return `**${event.name}** will be held at the **${venueStr}**.`;
+      if (event.venue) return `**${event.name}** will be held at **${venueStr}**.`;
+      return `The venue for **${event.name}** has not been announced yet.`;
 
     case 'prize':
       return `The prize pool for **${event.name}** is **${prizeStr}**.`;
@@ -40,7 +41,12 @@ export function formatEventDetails(event: any, query: string): string {
     case 'general':
     default:
       // A conversational summary (Not a receipt)
-      let summary = `**${event.name}** is a ${event.category || 'general'} event taking place on **${dateStr}** at **${timeStr}** in the **${venueStr}**.\n\n`;
+      let summary = '';
+      if (event.venue) {
+        summary = `**${event.name}** is a ${event.category || 'general'} event taking place on **${dateStr}** at **${timeStr}** in the **${venueStr}**.\n\n`;
+      } else {
+        summary = `**${event.name}** is a ${event.category || 'general'} event taking place on **${dateStr}** at **${timeStr}**. Venue to be announced.\n\n`;
+      }
 
       if (event.shortDescription) summary += `${event.shortDescription}\n\n`;
 
