@@ -1,17 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/utils/supabase/server';
 import { rateLimiter } from '@/lib/chatbot/rate-limiter';
-import { formatEventDetails } from '@/lib/chatbot/formatter'; // Ensure this file exists from previous step
+import { formatEventDetails } from '@/lib/chatbot/formatter';
+import { analyzeQuery, QueryIntent } from '@/lib/chatbot/analyzer';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
-  let sessionId = 'unknown'; // Default if extraction fails
   const supabase = await createClient();
+  let sessionId = 'unknown';
 
   try {
     const body = await req.json();
-    const message = body.message;
+    const { message } = body;
+    // Receive the memory from the client
+    const lastEventContext = body.activeContext || null;
     sessionId = body.sessionId || 'unknown';
 
     // 1. Rate Limit
@@ -19,82 +22,86 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ response: "You're typing too fast! Give me a minute." }, { status: 429 });
     }
 
-    if (!message) return NextResponse.json({ response: "Please say something!" });
-
-    // 2. LOGGING (Awaited to ensure it works)
-    // We log the raw message immediately.
-    const logPromise = supabase.from('query_logs').insert({
+    // 2. Logging
+    await supabase.from('query_logs').insert({
       session_id: sessionId,
       query_text: message,
       source: 'incoming'
     });
 
-    // 3. THE LOOKUP (Database First)
-    // We pass the raw message "whn is meme tech" directly to Postgres.
-    const { data: eventMatches, error: searchError } = await supabase.rpc(
+    // 3. Analyze Intent (Is it a greeting? general info? or event details?)
+    const analysis = analyzeQuery(message);
+
+    // If it's a greeting, return early
+    if (analysis.intent === QueryIntent.GREETING) {
+      return NextResponse.json({
+        response: "Hello! I can help you with event details, schedules, and venues. What would you like to know?",
+        context: lastEventContext // Keep existing context
+      });
+    }
+
+    // 4. THE LOOKUP STRATEGY
+    let targetedEvent = null;
+
+    // STRATEGY A: Direct Fuzzy Search
+    // We try this FIRST. If the user says "Robowars", this returns a hit.
+    // If the user says "When is it", this likely returns nothing or low-score garbage.
+    const { data: eventMatches } = await supabase.rpc(
       'search_events_fuzzy',
       { search_query: message }
     );
 
-    if (searchError) {
-      console.error("DB Search Error:", searchError);
-      throw new Error("Database search failed");
+    // Check if we got a GOOD match. 
+    // You might want to adjust logic: if the user says "when is it", fuzzy search might match "Internet" (bad).
+    // But usually, short stopwords like "it" don't match event names well.
+    if (eventMatches && eventMatches.length > 0) {
+      targetedEvent = eventMatches[0];
     }
 
-    // 4. DECISION LOGIC
-    // Did we find an event?
-    if (eventMatches && eventMatches.length > 0) {
-      const match = eventMatches[0];
+    // STRATEGY B: Context Fallback
+    // If Direct Search failed (no results), AND we have memory, AND the user isn't asking about WiFi...
+    // ...Then we assume "it" refers to the memory.
+    else if (lastEventContext && analysis.intent !== QueryIntent.GENERAL_INFO) {
+      console.log(`Search failed. Falling back to context: ${lastEventContext}`);
 
-      // FETCH FULL DETAILS
-      // The fuzzy search returns minimal data. Now we get the full row for the "Perfect Answer".
-      const { data: fullEvent } = await supabase
+      const { data: contextMatch } = await supabase
         .from('events')
-        .select('*')
-        .eq('id', match.id)
+        .select('*') // Get everything needed for the formatter
+        .ilike('name', lastEventContext) // Match the name stored in memory
         .single();
 
-      if (fullEvent) {
-        // Mark log as successful lookup
-        await supabase.from('query_logs').insert({
-          session_id: sessionId,
-          query_text: message,
-          intent: 'event_lookup',
-          source: `match: ${fullEvent.name}`
-        });
-
-        // Return the Professional Guide response
-        // New
-        return NextResponse.json({ response: formatEventDetails(fullEvent, message) });
+      if (contextMatch) {
+        targetedEvent = contextMatch;
       }
     }
 
-    // 5. NO EVENT FOUND?
-    // This is where "whn is meme tech" succeeds (caught above), but "Rules for library" fails.
-    // For now, since you want to perfect Event Lookup first, we return a helpful failure message.
+    // 5. FETCH AND FORMAT
+    if (targetedEvent) {
+      // If we only have the partial data from RPC, fetch full row now
+      // (Optimization: if Strategy B ran, we already have full row, but this is safe)
+      const { data: fullEvent } = await supabase
+        .from('events')
+        .select('*')
+        .eq('id', targetedEvent.id)
+        .single();
 
-    await logPromise; // Ensure the initial log is saved
-
-    // Check if it's a "Next Event" query (simple regex still useful here)
-    if (message.toLowerCase().includes('next') || message.toLowerCase().includes('now')) {
-      // ... (Add your 'Next Event' logic here if desired, or keep it simple for now)
+      if (fullEvent) {
+        // Return the formatted response AND the new context name
+        return NextResponse.json({
+          response: formatEventDetails(fullEvent, message),
+          context: fullEvent.name
+        });
+      }
     }
 
+    // 6. FAILURE HANDLING
     return NextResponse.json({
-      response: "I couldn't find an event with that name. I can tell you about any event in the schedule—just ask!"
+      response: "I couldn't find that event. Try asking about a specific event like 'Robowars'!",
+      context: lastEventContext // Don't wipe memory on failure, keep it.
     });
 
   } catch (e: any) {
     console.error("Server Error:", e);
-    // Log the error
-    await supabase.from('query_logs').insert({
-      session_id: sessionId,
-      query_text: "ERROR_TRACE",
-      source: e.message
-    });
-
-    return NextResponse.json({
-      response: "I'm having trouble accessing the schedule right now. Please try again."
-    }, { status: 500 });
+    return NextResponse.json({ response: "System error." }, { status: 500 });
   }
 }
