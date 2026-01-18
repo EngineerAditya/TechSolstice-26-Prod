@@ -26,13 +26,8 @@
   }
 }
 
-html {
-  background-color: #000000;
-}
-
 body {
   background: var(--background);
-  background-color: #000000;
   background-attachment: fixed;
   background-repeat: no-repeat;
   color: var(--foreground);
@@ -57,6 +52,8 @@ body,
   min-width: 100%;
   overflow-x: hidden;
   /* prevent horizontal scroll due to safe-area/overflow */
+  /* Prevent overscroll bounce revealing white background */
+  overscroll-behavior-y: none;
 }
 
 /* Hide scrollbars but preserve scroll (Firefox) */
