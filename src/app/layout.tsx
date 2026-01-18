@@ -40,6 +40,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Set browser theme color to black to prevent white flash on overscroll */}
+        <meta name="theme-color" content="#000000" />
+        <meta name="msapplication-navbutton-color" content="#000000" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
         {/* Critical resource preloading for performance */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -72,7 +76,7 @@ export default function RootLayout({
         }} />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SpeedInsights />
         <Analytics />

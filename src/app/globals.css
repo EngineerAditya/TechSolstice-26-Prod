@@ -27,9 +27,7 @@
 }
 
 body {
-  background: var(--background);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
+  background: transparent;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   /* Disable mobile tap highlight and selection */

@@ -139,7 +139,7 @@ const SpeakerShowcase: React.FC = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full min-h-[100vh] bg-transparent overflow-hidden flex flex-col items-center justify-center py-20 lg:py-0"
+      className="relative w-full min-h-[100vh] bg-transparent overflow-hidden flex flex-col items-center justify-center py-12 md:py-16 lg:py-0"
       style={{ perspective: "1500px" }}
     >
       {/* Background Ambience */}
@@ -147,11 +147,11 @@ const SpeakerShowcase: React.FC = () => {
 
       <div
         ref={containerRef}
-        className="relative w-full max-w-[1400px] h-full flex flex-col lg:block items-center justify-center gap-12 px-6 z-10"
+        className="relative w-full max-w-[1400px] h-full flex flex-col lg:block items-center justify-center gap-8 lg:gap-12 px-6 z-10"
       >
 
         {/* HEADER */}
-        <div className="relative z-50 text-center lg:absolute lg:top-[12%] lg:left-0 lg:right-0 lg:w-full space-y-2">
+        <div className="relative z-50 text-center lg:absolute lg:top-[8%] lg:left-0 lg:right-0 lg:w-full space-y-2 mb-4 lg:mb-0">
 
           <h2 className="vintage-font text-3xl sm:text-4xl md:text-5xl text-white/90 drop-shadow-lg">
             THE KEYNOTE
@@ -161,7 +161,7 @@ const SpeakerShowcase: React.FC = () => {
         {/* TV WRAPPER */}
         <div
           ref={tvRef}
-          className="relative z-30 w-full max-w-[500px] aspect-video lg:h-[55vh] lg:w-auto lg:aspect-[4/3] bg-neutral-900 rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center group"
+          className="relative z-30 w-full max-w-[500px] aspect-video lg:h-[55vh] lg:w-auto lg:aspect-[4/3] bg-neutral-900 rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center group lg:mt-8"
         >
           {/* Subtle Outer Glow/Border */}
           <div className="absolute inset-0 border border-white/10 rounded-2xl z-50 pointer-events-none" />
