@@ -205,31 +205,30 @@ const ASMRStaticBackground: React.FC = () => {
   }, []);
 
   return (
-    <div 
+    <div
       className="fixed inset-0 -z-10 pointer-events-none"
       style={{
         backgroundColor: '#000000',
-        minHeight: '100vh',
-        height: '100%',
         WebkitTapHighlightColor: 'transparent',
         WebkitTouchCallout: 'none',
         userSelect: 'none',
-        WebkitUserSelect: 'none'
+        WebkitUserSelect: 'none',
+        touchAction: 'none'
       }}
     >
-      <div className="absolute inset-0" style={{ backgroundColor: '#000000', minHeight: '100vh' }}>
+      <div className="absolute inset-0" style={{ backgroundColor: '#000000' }}>
         <canvas
           ref={canvasRef}
           className="w-full h-full block absolute inset-0"
-          style={{ 
-            transform: "translateZ(0)", 
+          style={{
+            transform: "translateZ(0)",
             filter: "blur(9px)",
             backgroundColor: '#000000',
-            minHeight: '100vh',
             willChange: 'transform',
             WebkitTapHighlightColor: 'transparent',
             userSelect: 'none',
-            WebkitUserSelect: 'none'
+            WebkitUserSelect: 'none',
+            touchAction: 'none'
           }}
         />
 

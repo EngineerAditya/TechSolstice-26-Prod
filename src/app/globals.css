@@ -26,27 +26,15 @@
   }
 }
 
-/* Prevent white flashing on mobile - ensure black background everywhere */
 html {
   background-color: #000000;
-  min-height: 100vh;
-  min-height: 100dvh; /* Dynamic viewport height for mobile */
-  overscroll-behavior-y: contain; /* Allow scroll but prevent bounce revealing white */
-  overscroll-behavior-x: none;
-  -webkit-overflow-scrolling: touch;
 }
 
 body {
   background: var(--background);
-  background-color: #000000; /* Fallback solid color */
+  background-color: #000000;
+  background-attachment: fixed;
   background-repeat: no-repeat;
-  background-size: 100% 200%; /* Make gradient taller to cover scroll */
-  background-position: top center;
-  /* Don't use background-attachment: fixed on mobile - causes white flashing */
-  min-height: 100vh;
-  min-height: 100dvh;
-  overscroll-behavior-y: contain; /* Prevent bounce but allow scroll */
-  overscroll-behavior-x: none;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   /* Disable mobile tap highlight and selection */
@@ -59,7 +47,6 @@ body {
 /* Full-bleed layout and hidden vertical scrollbar
    - Keeps scrolling behavior but hides the visible scrollbar across browsers
    - Ensures root elements span the full viewport width so child components can reach edges
-   - Min-height ensures content always fills viewport (prevents white at bottom)
 */
 html,
 body,
@@ -68,7 +55,6 @@ body,
   padding: 0;
   width: 100%;
   min-width: 100%;
-  min-height: 100vh;
   overflow-x: hidden;
   /* prevent horizontal scroll due to safe-area/overflow */
 }
