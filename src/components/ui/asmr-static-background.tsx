@@ -214,8 +214,7 @@ const ASMRStaticBackground: React.FC = () => {
         WebkitTapHighlightColor: 'transparent',
         WebkitTouchCallout: 'none',
         userSelect: 'none',
-        WebkitUserSelect: 'none',
-        touchAction: 'none'
+        WebkitUserSelect: 'none'
       }}
     >
       <div className="absolute inset-0" style={{ backgroundColor: '#000000', minHeight: '100vh' }}>
@@ -230,8 +229,7 @@ const ASMRStaticBackground: React.FC = () => {
             willChange: 'transform',
             WebkitTapHighlightColor: 'transparent',
             userSelect: 'none',
-            WebkitUserSelect: 'none',
-            touchAction: 'none'
+            WebkitUserSelect: 'none'
           }}
         />
 

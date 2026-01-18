@@ -31,7 +31,8 @@ html {
   background-color: #000000;
   min-height: 100vh;
   min-height: 100dvh; /* Dynamic viewport height for mobile */
-  overscroll-behavior: none; /* Prevent bounce/rubber-banding */
+  overscroll-behavior-y: contain; /* Allow scroll but prevent bounce revealing white */
+  overscroll-behavior-x: none;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -39,11 +40,13 @@ body {
   background: var(--background);
   background-color: #000000; /* Fallback solid color */
   background-repeat: no-repeat;
-  background-size: 100% 100%;
+  background-size: 100% 200%; /* Make gradient taller to cover scroll */
+  background-position: top center;
   /* Don't use background-attachment: fixed on mobile - causes white flashing */
   min-height: 100vh;
   min-height: 100dvh;
-  overscroll-behavior: none;
+  overscroll-behavior-y: contain; /* Prevent bounce but allow scroll */
+  overscroll-behavior-x: none;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   /* Disable mobile tap highlight and selection */
@@ -68,7 +71,6 @@ body,
   min-height: 100vh;
   overflow-x: hidden;
   /* prevent horizontal scroll due to safe-area/overflow */
-  overscroll-behavior-x: none; /* Prevent horizontal overscroll */
 }
 
 /* Hide scrollbars but preserve scroll (Firefox) */
