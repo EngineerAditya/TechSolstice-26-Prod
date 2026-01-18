@@ -72,6 +72,7 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
+        style={{ backgroundColor: '#000000', minHeight: '100vh' }}
       >
         <SpeedInsights />
         <ScrollToTop />

@@ -99,7 +99,7 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="min-h-screen w-full relative">
+    <main className="min-h-screen w-full relative bg-black">
       <LoadingScreen fadeOut={!loading} />
 
       {/* Critical LCP Element - Rendered Immediately */}
