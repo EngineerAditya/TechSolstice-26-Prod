@@ -57,6 +57,7 @@ body,
 /* Prevent overscroll bounce revealing white background - only on html */
 html {
   overscroll-behavior-y: contain;
+  background-color: #000000;
 }
 
 /* Hide scrollbars but preserve scroll (Firefox) */

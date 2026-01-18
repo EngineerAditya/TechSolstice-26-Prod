@@ -8,6 +8,7 @@ import TechSolsticeNavbar from '@/components/navbar';
 import { Footer } from '@/components/footer';
 import Logo from '@/components/ui/logo';
 import { ScrollToTop } from '@/components/scroll-to-top';
+import { Analytics } from "@vercel/analytics/next"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -74,6 +75,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-black`}
       >
         <SpeedInsights />
+        <Analytics />
         <ScrollToTop />
         {/* Background layer - lowest z-index */}
         <ASMRStaticBackground />
