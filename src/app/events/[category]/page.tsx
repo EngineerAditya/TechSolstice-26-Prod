@@ -69,11 +69,11 @@ async function getData(categorySlug: string) {
   };
 }
 
-export default async function CategoryPage({
+const CategoryPage = async ({
   params,
 }: {
   params: Promise<{ category: string }>;
-}) {
+}) => {
   const { category: categorySlug } = await params;
   const data = await getData(categorySlug);
 
@@ -92,3 +92,6 @@ export default async function CategoryPage({
     />
   );
 }
+
+import { memo } from 'react';
+export default memo(CategoryPage);

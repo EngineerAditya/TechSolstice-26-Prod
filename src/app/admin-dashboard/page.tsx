@@ -54,7 +54,7 @@ export type AdminEvent = {
   registration_starts_at: string | null;
 };
 
-export default function AdminDashboard() {
+const AdminDashboard = () => {
   const supabase = createClient();
 
   const [events, setEvents] = useState<AdminEvent[]>([]);
@@ -344,3 +344,6 @@ export default function AdminDashboard() {
     </div>
   );
 }
+
+import { memo } from 'react';
+export default memo(AdminDashboard);

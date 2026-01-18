@@ -1,7 +1,7 @@
 import React from 'react';
 import { Mail, Phone, MapPin, Instagram, Linkedin, Twitter } from 'lucide-react';
 
-export default function ContactPage() {
+const ContactPage = () => {
   return (
     <div className="min-h-screen w-full">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -76,3 +76,6 @@ export default function ContactPage() {
     </div>
   );
 }
+
+import { memo } from 'react';
+export default memo(ContactPage);

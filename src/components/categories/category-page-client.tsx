@@ -21,26 +21,7 @@ export function CategoryPageClient({
   registeredEventIds,
   accessibleEventIds,
 }: CategoryPageClientProps) {
-  useEffect(() => {
-    let rafId: number;
-    (async () => {
-      try {
-        const Lenis = (await import('@studio-freight/lenis')).default;
-        const lenis = new Lenis();
-        function raf(time: number) {
-          lenis.raf(time);
-          rafId = requestAnimationFrame(raf);
-        }
-        rafId = requestAnimationFrame(raf);
-      } catch (e) {
-        console.warn("Lenis failed to load", e);
-      }
-    })();
-
-    return () => {
-      cancelAnimationFrame(rafId);
-    };
-  }, []);
+  // No-op: Lenis is now global
 
   return (
     <div className="min-h-screen w-full bg-black">

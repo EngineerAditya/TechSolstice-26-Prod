@@ -4,7 +4,7 @@ import Link from 'next/link'
 // import { Hourglass } from 'ldrs/react'
 // import 'ldrs/react/Hourglass.css'
 
-export default async function PassesPage() {
+const PassesPage = async () => {
   /* // --- COMMENTED OUT LOGIC FOR FUTURE USE ---
   const supabase = await createClient()
 
@@ -130,3 +130,6 @@ export default async function PassesPage() {
   }
   */
 }
+
+import { memo } from 'react';
+export default memo(PassesPage);

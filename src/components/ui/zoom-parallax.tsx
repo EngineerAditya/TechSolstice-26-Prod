@@ -133,7 +133,7 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
   };
 
   // --------------------------------------------------------------------------
-  // MOBILE RENDER (Fully Upgraded)
+  // MOBILE RENDER 
   // --------------------------------------------------------------------------
 
   if (isMobile) {
@@ -214,7 +214,7 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
   // --------------------------------------------------------------------------
 
   return (
-    <div ref={containerRef} className="relative w-full h-[500vh]">
+    <div ref={containerRef} className="relative w-full h-[200vh]">
       <motion.div className="absolute inset-0 bg-black" />
 
       <div style={containerStyle} className="flex items-center justify-center overflow-hidden">

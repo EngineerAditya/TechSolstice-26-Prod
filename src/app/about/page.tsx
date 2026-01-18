@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { memo } from 'react';
 
-export default function AboutPage() {
+const AboutPage = () => {
   return (
     <div className="min-h-screen w-full">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -35,3 +35,5 @@ export default function AboutPage() {
     </div>
   );
 }
+
+export default memo(AboutPage);

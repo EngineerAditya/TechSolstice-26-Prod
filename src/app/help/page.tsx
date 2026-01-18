@@ -50,7 +50,7 @@ interface TicketType {
   created_at: string
 }
 
-export default function HelpPage() {
+const HelpPage = () => {
   const [tickets, setTickets] = useState<TicketType[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -276,3 +276,6 @@ export default function HelpPage() {
     </div>
   )
 }
+
+import { memo } from 'react';
+export default memo(HelpPage);

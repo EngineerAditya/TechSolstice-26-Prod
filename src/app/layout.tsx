@@ -3,6 +3,7 @@ import { SpeedInsights } from "@vercel/speed-insights/next"
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ChatbotWidget } from "@/components/chatbot-widget";
+import LenisProvider from "@/components/LenisProvider";
 import ASMRStaticBackground from '@/components/ui/asmr-static-background';
 import TechSolsticeNavbar from '@/components/navbar';
 import { Footer } from '@/components/footer';
@@ -32,11 +33,11 @@ export const metadata: Metadata = {
   }
 };
 
-export default function RootLayout({
+const RootLayout = ({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) {
+}>) => {
   return (
     <html lang="en">
       <head>
@@ -75,38 +76,41 @@ export default function RootLayout({
           `
         }} />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <SpeedInsights />
-        <Analytics />
-        <ScrollToTop />
-        {/* Background layer - lowest z-index */}
-        <ASMRStaticBackground />
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <LenisProvider>
+          <SpeedInsights />
+          <Analytics />
+          <ScrollToTop />
+          {/* Background layer - lowest z-index */}
+          <ASMRStaticBackground />
 
-        {/* Fixed Logo - same as homepage */}
-        <div className="fixed top-4 left-4 md:top-6 md:left-8 z-50 flex items-center">
-          <Logo />
-        </div>
+          {/* Fixed Logo - same as homepage */}
+          <div className="fixed top-4 left-4 md:top-6 md:left-8 z-50 flex items-center">
+            <Logo />
+          </div>
 
-        {/* Global sticky navbar - high z-index to stay on top */}
-        <div className="relative z-50">
-          <TechSolsticeNavbar />
-        </div>
+          {/* Global sticky navbar - high z-index to stay on top */}
+          <div className="relative z-50">
+            <TechSolsticeNavbar />
+          </div>
 
-        {/* Main content area - medium z-index; navbar is fixed so no top padding needed */}
-        <div className="relative z-10">
-          {children}
-        </div>
+          {/* Main content area - medium z-index; navbar is fixed so no top padding needed */}
+          <div className="relative z-10">
+            {children}
+          </div>
 
-        {/* Footer at the bottom */}
-        <div className="relative z-10">
-          <Footer />
-        </div>
+          {/* Footer at the bottom */}
+          <div className="relative z-10">
+            <Footer />
+          </div>
 
-        {/* Chatbot widget - highest z-index */}
-        <ChatbotWidget />
+          {/* Chatbot widget - highest z-index */}
+          <ChatbotWidget />
+        </LenisProvider>
       </body>
     </html>
   );
 }
+
+import { memo } from 'react';
+export default memo(RootLayout);

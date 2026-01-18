@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function CompleteProfile() {
+const CompleteProfile = () => {
   const router = useRouter()
   const supabase = createClient()
 
@@ -198,3 +198,6 @@ export default function CompleteProfile() {
     </div>
   )
 }
+
+import { memo } from 'react';
+export default memo(CompleteProfile);

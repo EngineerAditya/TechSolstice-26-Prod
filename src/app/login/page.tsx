@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/client'
 import { useState } from 'react'
 
-export default function LoginPage() {
+const LoginPage = () => {
   const [loading, setLoading] = useState(false)
 
   const handleLogin = async (provider: 'google' | 'azure') => {
@@ -77,3 +77,6 @@ export default function LoginPage() {
     </div>
   )
 }
+
+import { memo } from 'react';
+export default memo(LoginPage);

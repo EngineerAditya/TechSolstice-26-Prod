@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, memo } from "react";
 import dynamic from "next/dynamic";
 import { HeroRobot } from "../components/hero-robot";
 import FestInfo from "@/components/ui/fest-info";
@@ -36,7 +36,7 @@ const SponsorsSection = dynamic(
   { ssr: true }
 );
 
-export default function Home() {
+const Home = () => {
   const [loading, setLoading] = useState(true);
   const [isReady, setIsReady] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -65,36 +65,10 @@ export default function Home() {
       setLoading(false);
     }, 2500);
 
-    let lenis: any;
-    let rafId: number;
-
-    const initLenis = async () => {
-      try {
-        const Lenis = (await import('@studio-freight/lenis')).default;
-        lenis = new Lenis({
-          duration: 1.2,
-          easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-          smoothWheel: true,
-        });
-
-        function raf(time: number) {
-          lenis.raf(time);
-          rafId = requestAnimationFrame(raf);
-        }
-        rafId = requestAnimationFrame(raf);
-      } catch (e) {
-        console.warn("Lenis failed to load", e);
-      }
-    };
-
-    initLenis();
-
     return () => {
       window.removeEventListener("resize", checkDesktop);
       clearTimeout(readyTimer);
       clearTimeout(finishTimer);
-      if (rafId) cancelAnimationFrame(rafId);
-      if (lenis) lenis.destroy();
     };
   }, []);
 
@@ -155,3 +129,5 @@ export default function Home() {
     </main>
   );
 }
+
+export default memo(Home);

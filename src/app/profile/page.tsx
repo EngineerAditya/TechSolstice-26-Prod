@@ -6,7 +6,7 @@ import ProfileClient from "@/components/profile/profile-client";
 // Ensure fresh data on navigation
 export const dynamic = "force-dynamic";
 
-export default async function ProfilePage() {
+const ProfilePage = async () => {
   const supabase = await createClient();
 
   // 1. Get Current User
@@ -71,3 +71,6 @@ export default async function ProfilePage() {
     </Layout>
   );
 }
+
+import { memo } from 'react';
+export default memo(ProfilePage);

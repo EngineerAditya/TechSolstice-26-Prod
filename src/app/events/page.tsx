@@ -5,44 +5,13 @@ import { EVENT_CATEGORIES } from "@/lib/constants/categories";
 import { CategoryCard } from "@/components/categories/category-card"; // Make sure path matches your structure
 import { PatternText } from "@/components/ui/pattern-text";
 
+import { memo } from 'react';
 const EventsPage = () => {
   // Separate conclave as the featured category
   const conclaveCategory = EVENT_CATEGORIES.find(cat => cat.slug === 'conclave');
   const otherCategories = EVENT_CATEGORIES.filter(cat => cat.slug !== 'conclave');
 
-  // Initialize smooth scrolling with Lenis
-  useEffect(() => {
-    let lenis: any;
-    let rafId: number;
-    let isMounted = true;
-
-    const initLenis = async () => {
-      try {
-        const LenisModule = await import('@studio-freight/lenis');
-        const Lenis = LenisModule.default;
-
-        if (!isMounted) return;
-
-        lenis = new Lenis();
-
-        const raf = (time: number) => {
-          lenis.raf(time);
-          rafId = requestAnimationFrame(raf);
-        };
-        rafId = requestAnimationFrame(raf);
-      } catch (e) {
-        console.warn("Lenis failed to load", e);
-      }
-    };
-
-    initLenis();
-
-    return () => {
-      isMounted = false;
-      if (lenis) lenis.destroy();
-      if (rafId) cancelAnimationFrame(rafId);
-    };
-  }, []);
+  // No-op: Lenis is now global
 
   return (
     <div className="min-h-screen w-full relative">
@@ -91,4 +60,4 @@ const EventsPage = () => {
   );
 };
 
-export default EventsPage;
+export default memo(EventsPage);

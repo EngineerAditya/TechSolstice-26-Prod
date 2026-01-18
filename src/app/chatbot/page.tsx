@@ -1,9 +1,12 @@
 import Chat from '@/components/Chat';
 
-export default function HomePage() {
+import { memo } from 'react';
+const HomePage = () => {
   return (
     <main>
       <Chat />
     </main>
   );
 }
+
+export default memo(HomePage);
