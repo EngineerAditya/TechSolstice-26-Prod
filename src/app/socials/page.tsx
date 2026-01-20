@@ -21,14 +21,14 @@ const SocialsPage = () => {
       glowColor: 'bg-blue-500/20',
       icon: <Linkedin className="w-6 h-6 text-blue-500" />,
     },
-    {
-      name: 'YouTube',
-      handle: 'TechSolstice Official',
-      url: 'https://youtube.com',
-      borderColor: 'group-hover:border-red-500/50',
-      glowColor: 'bg-red-500/20',
-      icon: <Youtube className="w-6 h-6 text-red-500" />,
-    },
+    // {
+    //   name: 'YouTube',
+    //   handle: 'TechSolstice Official',
+    //   url: 'https://youtube.com',
+    //   borderColor: 'group-hover:border-red-500/50',
+    //   glowColor: 'bg-red-500/20',
+    //   icon: <Youtube className="w-6 h-6 text-red-500" />,
+    // },
   ];
 
   return (
