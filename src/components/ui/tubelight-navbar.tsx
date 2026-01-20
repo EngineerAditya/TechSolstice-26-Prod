@@ -51,6 +51,7 @@ export function NavBar({ items, className }: NavBarProps) {
 
   return (
     <>
+      {/* Top Gradient Overlay */}
       <div
         className="fixed top-0 left-0 right-0 h-20 z-[98] pointer-events-none"
         style={{
@@ -70,7 +71,6 @@ export function NavBar({ items, className }: NavBarProps) {
           }}
         >
           {items.map((item) => {
-            const Icon = item.icon;
             const isActive = activeTab === item.name;
 
             return (
@@ -131,48 +131,83 @@ export function NavBar({ items, className }: NavBarProps) {
             transition={{ duration: 0.3 }}
             className="md:hidden fixed inset-0 z-[101]"
             style={{
-              background: "linear-gradient(135deg, rgba(0,0,0,0.4) 0%, rgba(20,20,20,0.3) 50%, rgba(0,0,0,0.4) 100%)",
+              background: "linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(10,10,10,0.5) 50%, rgba(0,0,0,0.6) 100%)",
               WebkitBackdropFilter: "blur(40px) saturate(180%)",
               backdropFilter: "blur(40px) saturate(180%)",
-              boxShadow: "inset 0 0 200px rgba(255,255,255,0.03)",
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-white/5 pointer-events-none" />
-            <div className="absolute inset-0 border border-white/10 pointer-events-none" />
-            <motion.div
-              initial={{ y: -20, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: -20, opacity: 0 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="flex flex-col items-center justify-center h-full gap-8 px-8 relative z-10"
-            >
-              {items.map((item, index) => {
-                const Icon = item.icon;
-                const isActive = activeTab === item.name;
 
-                return (
-                  <motion.div
-                    key={item.name}
-                    initial={{ y: 20, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 20, opacity: 0 }}
-                    transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
-                  >
-                    <Link
-                      href={item.url}
-                      prefetch={false}
-                      onClick={(e: any) => handleNavClick(item, e)}
-                      className={cn(
-                        "flex items-center gap-4 text-3xl font-semibold transition-all duration-300",
-                        isActive ? "text-white scale-110" : "text-neutral-400 hover:text-white hover:scale-105"
-                      )}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="flex flex-col items-center justify-center h-full relative z-10"
+            >
+              <div className="flex flex-col gap-8">
+                {items.map((item, index) => {
+                  const Icon = item.icon;
+                  const isActive = activeTab === item.name;
+
+                  return (
+                    <motion.div
+                      key={item.name}
+                      initial={{ x: -30, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: -30, opacity: 0 }}
+                      transition={{ duration: 0.4, delay: index * 0.05, ease: "easeOut" }}
                     >
-                      <Icon className="w-8 h-8" strokeWidth={2.5} />
-                      <span>{item.name}</span>
-                    </Link>
-                  </motion.div>
-                );
-              })}
+                      <Link
+                        href={item.url}
+                        prefetch={false}
+                        onClick={(e: any) => handleNavClick(item, e)}
+                        className={cn(
+                          "flex items-center gap-6 transition-all duration-300 group",
+                          isActive ? "scale-110" : "scale-100 hover:translate-x-2"
+                        )}
+                      >
+                        {/* Perfect Alignment Icon Box */}
+                        <div className={cn(
+                          "w-12 h-12 flex items-center justify-center rounded-xl transition-all duration-300 border",
+                          isActive
+                            ? "bg-white/10 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.1)]"
+                            : "bg-white/5 border-white/5 group-hover:border-white/20"
+                        )}>
+                          {item.name === "LinkedIn" ? (
+                            <svg
+                              viewBox="0 0 24 24"
+                              className={cn(
+                                "w-6 h-6 transition-colors fill-current",
+                                isActive ? "text-white" : "text-neutral-500 group-hover:text-neutral-300"
+                              )}
+                            >
+                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451c.981 0 1.778-.773 1.778-1.729V1.729C24 .774 23.206 0 22.225 0z" />
+                            </svg>
+                          ) : (
+                            <Icon
+                              className={cn(
+                                "w-6 h-6 transition-colors",
+                                isActive ? "text-white" : "text-neutral-500 group-hover:text-neutral-300"
+                              )}
+                              strokeWidth={2}
+                            />
+                          )}
+                        </div>
+
+                        {/* Text Alignment */}
+                        <span
+                          className={cn(
+                            "text-3xl font-bold tracking-tight transition-colors",
+                            isActive ? "text-white" : "text-neutral-500 group-hover:text-neutral-300"
+                          )}
+                        >
+                          {item.name}
+                        </span>
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
             </motion.div>
           </motion.div>
         )}
