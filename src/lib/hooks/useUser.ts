@@ -1,28 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
-import type { User } from "@supabase/supabase-js";
+import { useSession } from "next-auth/react";
+import type { Session } from "next-auth";
 
 export function useUser() {
-  const [user, setUser] = useState<User | null>(null);
-  const supabase = createClient();
+  const { data: session, status } = useSession();
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
-    });
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setUser(session?.user ?? null);
-      }
-    );
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, [supabase.auth]);
-
-  return user;
+  return {
+    user: session?.user || null,
+    loading: status === "loading",
+    session,
+  };
 }

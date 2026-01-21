@@ -1,5 +1,11 @@
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@supabase/supabase-js';
 import { generateEmbedding } from './gemini-client';
+
+// Supabase client for database operations
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export interface VectorSearchResult {
   content: string;
@@ -19,8 +25,6 @@ export async function searchSimilarContent(
   try {
     // Generate embedding for the query
     const queryEmbedding = await generateEmbedding(query);
-
-    const supabase = await createClient();
 
     // Perform vector similarity search using pgvector
     // Note: This assumes you have the pgvector extension enabled

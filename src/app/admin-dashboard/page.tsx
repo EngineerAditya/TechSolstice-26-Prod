@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase client for database operations only
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 import {
   Table,
   TableBody,
@@ -55,15 +63,47 @@ export type AdminEvent = {
 };
 
 const AdminDashboard = () => {
-  const supabase = createClient();
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
   const [events, setEvents] = useState<AdminEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   // Modal State
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<AdminEvent | null>(null);
+
+  // Check if user is admin
+  useEffect(() => {
+    async function checkAdminStatus() {
+      if (status === 'unauthenticated') {
+        router.push('/login');
+        return;
+      }
+
+      if (status === 'loading' || !session?.user?.id) {
+        return;
+      }
+
+      // Check if user exists in admins table
+      const { data, error } = await supabase
+        .from('admins')
+        .select('user_id')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (error || !data) {
+        // Not an admin - redirect to profile
+        router.push('/profile');
+      } else {
+        setIsAdmin(true);
+      }
+    }
+
+    checkAdminStatus();
+  }, [session, status, router]);
 
   // --- FETCH DATA ---
   const fetchEvents = async () => {
@@ -83,8 +123,10 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    if (isAdmin) {
+      fetchEvents();
+    }
+  }, [isAdmin]);
 
   // --- ACTIONS ---
 
@@ -165,11 +207,19 @@ const AdminDashboard = () => {
   const totalEvents = events.length;
   const activeEvents = events.filter(e => e.is_reg_open).length;
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-cyan-400">
-      <Loader2 className="animate-spin h-8 w-8" />
-    </div>
-  );
+  // Show loading while checking admin status or fetching data
+  if (status === 'loading' || isAdmin === null || loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-cyan-400">
+        <Loader2 className="animate-spin h-8 w-8" />
+      </div>
+    );
+  }
+
+  // If not admin, don't render anything (redirect happens in useEffect)
+  if (!isAdmin) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-white p-6 md:p-12 font-sans">

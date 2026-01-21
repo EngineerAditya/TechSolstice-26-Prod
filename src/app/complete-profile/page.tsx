@@ -1,197 +1,222 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { createClient } from "@supabase/supabase-js"
+
+// Supabase client for database operations only
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const CompleteProfile = () => {
+  const { data: session, status } = useSession()
   const router = useRouter()
-  const supabase = createClient()
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  // Form State
   const [formData, setFormData] = useState({
     fullName: '',
     mobileNumber: '',
-    registrationNumber: '',
     collegeName: '',
+    registrationNumber: '',
   })
 
-  // Logic State
-  const [loading, setLoading] = useState(false)
-  const [isMahe, setIsMahe] = useState(false)
-  const [isNamePrefilled, setIsNamePrefilled] = useState(false)
-
-  // 1. Fetch User Info on Mount
+  // Redirect if not authenticated
   useEffect(() => {
-    const fetchUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser()
+    if (status === 'unauthenticated') {
+      router.push('/login')
+    }
 
-      if (!user) {
-        router.replace('/login')
-        return
-      }
+    // Pre-fill name from Google OAuth if available
+    if (session?.user?.name) {
+      setFormData(prev => ({ ...prev, fullName: session.user.name || '' }))
+    }
+  }, [status, session, router])
 
-      // Check University Status
-      const isUniversityStudent = user.email?.endsWith('@learner.manipal.edu') || false
-      setIsMahe(isUniversityStudent)
+  // Check if profile already exists and is complete
+  useEffect(() => {
+    async function checkProfile() {
+      if (!session?.user?.id) return
 
-      // Fetch existing profile data
-      // CHANGED: .maybeSingle() prevents the 406 Error if row is missing
       const { data: profile } = await supabase
         .from('profiles')
-        .select('full_name')
-        .eq('id', user.id)
-        .maybeSingle()
+        .select('*')
+        .eq('user_id', session.user.id)
+        .single()
 
-      if (profile?.full_name) {
-        setFormData(prev => ({ ...prev, fullName: profile.full_name }))
-        setIsNamePrefilled(true)
+      // If profile is complete, redirect to profile page
+      if (profile && profile.mobile_number && profile.full_name && profile.college_name) {
+        router.push('/profile')
       }
     }
-    fetchUser()
-  }, [router, supabase])
 
-  // 2. Handle Input Changes
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
+    checkProfile()
+  }, [session, router])
 
-    // Strict Input masking for Mobile Number
-    if (name === 'mobileNumber') {
-      const numbersOnly = value.replace(/[^0-9]/g, '').slice(0, 10)
-      setFormData(prev => ({ ...prev, [name]: numbersOnly }))
-      return
-    }
-
-    setFormData(prev => ({ ...prev, [name]: value }))
-  }
-
-  // 3. Submit Handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError(null)
 
-    // Validation
-    if (!formData.fullName.trim()) { alert('Full Name is required'); setLoading(false); return; }
-    if (formData.mobileNumber.length !== 10) { alert('Enter valid 10-digit mobile number'); setLoading(false); return; }
-    if (!formData.registrationNumber.trim()) { alert('Registration Number is required'); setLoading(false); return; }
-    if (!isMahe && !formData.collegeName.trim()) { alert('College Name is required'); setLoading(false); return; }
+    // Validate
+    if (!formData.fullName || !formData.mobileNumber || !formData.collegeName) {
+      setError('Please fill in all required fields')
+      setLoading(false)
+      return
+    }
+
+    // Validate mobile number format (10 digits)
+    if (!/^[0-9]{10}$/.test(formData.mobileNumber)) {
+      setError('Mobile number must be exactly 10 digits')
+      setLoading(false)
+      return
+    }
 
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('No user found')
+      if (!session?.user) {
+        setError('Not authenticated')
+        return
+      }
 
-      // Recalculate Auth Provider (In case we are inserting a fresh row)
-      const provider = user.app_metadata?.provider || 'google'
-      const authProvider = provider === 'azure' ? 'microsoft' : provider
-
-      // CHANGED: Used .upsert() instead of .update()
-      // This creates the row if it's missing, or updates it if it exists.
-      const { error } = await supabase
+      // Insert profile into database (only after all fields are filled)
+      const { error: insertError } = await supabase
         .from('profiles')
-        .upsert({
-          id: user.id, // Primary Key matches Auth ID
-          email: user.email, // Ensure email is saved if new row
-          auth_provider: authProvider,
-          is_university_student: isMahe,
-
-          full_name: formData.fullName.trim(),
+        .insert({
+          user_id: session.user.id,
+          email: session.user.email,
+          full_name: formData.fullName,
           mobile_number: formData.mobileNumber,
-          registration_number: formData.registrationNumber.trim(),
-          college_name: isMahe ? null : formData.collegeName.trim(),
-        }, { onConflict: 'id' }) // Prevent duplicates, update existing
+          college_name: formData.collegeName,
+          registration_number: formData.registrationNumber || null,
+        })
 
-      if (error) throw error
+      if (insertError) {
+        // Check if it's a duplicate mobile number error
+        if (insertError.code === '23505') {
+          setError('This mobile number is already registered')
+        } else {
+          setError('Failed to create profile. Please try again.')
+        }
+        console.error('Profile creation error:', insertError)
+        setLoading(false)
+        return
+      }
 
-      // Success
-      router.refresh()
-      router.push('/passes')
-
-    } catch (err: any) {
-      console.error('Profile save error:', err)
-      alert(err.message || 'Failed to update profile.')
-    } finally {
+      // Success - redirect to profile
+      router.push('/profile')
+    } catch (err) {
+      console.error('Error:', err)
+      setError('An unexpected error occurred')
       setLoading(false)
     }
   }
 
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-transparent px-6 text-white relative">
-      <div className="absolute inset-0 -z-10 bg-transparent" />
-      <div className="w-full max-w-md">
-        <h1 className="mb-2 text-3xl font-bold text-blue-500">Complete Profile</h1>
-        <p className="mb-8 text-gray-400">
-          We need a few more details to generate your event pass.
-        </p>
+  if (status === 'loading') {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+  return (
+    <div className="flex min-h-screen flex-col items-center justify-center bg-transparent px-6 py-12 text-white">
+      <div className="w-full max-w-md space-y-8">
+
+        {/* Header */}
+        <div className="text-center">
+          <h1 className="text-4xl font-extrabold tracking-tight text-blue-500">
+            Complete Your Profile
+          </h1>
+          <p className="mt-3 text-base text-gray-400">
+            Please provide your details to continue
+          </p>
+        </div>
+
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="mt-8 space-y-6">
+
           {/* Full Name */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-300">Full Name</label>
+            <label htmlFor="fullName" className="block text-sm font-medium text-gray-300">
+              Full Name <span className="text-red-500">*</span>
+            </label>
             <input
-              name="fullName"
               type="text"
-              required
-              autoFocus={!isNamePrefilled}
+              id="fullName"
               value={formData.fullName}
-              onChange={handleChange}
-              className="w-full rounded-xl bg-gray-900 border border-gray-700 p-4 text-lg text-white focus:border-blue-500 focus:outline-none"
-              placeholder="e.g. Aditi Sharma"
+              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+              className="mt-1 block w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your full name"
+              required
             />
           </div>
 
           {/* Mobile Number */}
           <div>
-            <label className="mb-2 block text-sm font-medium text-gray-300">WhatsApp Number</label>
-            <div className="relative">
-              <span className="absolute left-4 top-4 text-gray-500">+91</span>
-              <input
-                name="mobileNumber"
-                type="tel"
-                required
-                value={formData.mobileNumber}
-                onChange={handleChange}
-                className="w-full rounded-xl bg-gray-900 border border-gray-700 p-4 pl-14 text-lg text-white focus:border-blue-500 focus:outline-none"
-                placeholder="9876543210"
-              />
-            </div>
-          </div>
-
-          {/* Registration Number */}
-          <div>
-            <label className="mb-2 block text-sm font-medium text-gray-300">Registration / Roll Number</label>
+            <label htmlFor="mobileNumber" className="block text-sm font-medium text-gray-300">
+              Mobile Number <span className="text-red-500">*</span>
+            </label>
             <input
-              name="registrationNumber"
-              type="text"
+              type="tel"
+              id="mobileNumber"
+              value={formData.mobileNumber}
+              onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value.replace(/\D/g, '') })}
+              className="mt-1 block w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="10-digit mobile number"
+              maxLength={10}
               required
-              value={formData.registrationNumber}
-              onChange={handleChange}
-              className="w-full rounded-xl bg-gray-900 border border-gray-700 p-4 text-lg text-white focus:border-blue-500 focus:outline-none"
-              placeholder={isMahe ? "e.g. 230912345" : "e.g. College Roll No."}
             />
           </div>
 
-          {/* College Name (Conditional) */}
-          {!isMahe && (
-            <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-              <label className="mb-2 block text-sm font-medium text-gray-300">College Name</label>
-              <input
-                name="collegeName"
-                type="text"
-                required={!isMahe}
-                value={formData.collegeName}
-                onChange={handleChange}
-                className="w-full rounded-xl bg-gray-900 border border-gray-700 p-4 text-lg text-white focus:border-blue-500 focus:outline-none"
-                placeholder="e.g. Nitte Institute of Technology"
-              />
+          {/* College Name */}
+          <div>
+            <label htmlFor="collegeName" className="block text-sm font-medium text-gray-300">
+              College Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              id="collegeName"
+              value={formData.collegeName}
+              onChange={(e) => setFormData({ ...formData, collegeName: e.target.value })}
+              className="mt-1 block w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your college name"
+              required
+            />
+          </div>
+
+          {/* Registration Number (Optional) */}
+          <div>
+            <label htmlFor="registrationNumber" className="block text-sm font-medium text-gray-300">
+              Registration Number <span className="text-gray-500">(Optional)</span>
+            </label>
+            <input
+              type="text"
+              id="registrationNumber"
+              value={formData.registrationNumber}
+              onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
+              className="mt-1 block w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter your registration number"
+            />
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="rounded-lg bg-red-500/10 border border-red-500 px-4 py-3 text-red-400 text-sm">
+              {error}
             </div>
           )}
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className="mt-4 w-full rounded-xl bg-blue-600 py-4 text-lg font-bold text-white transition-transform active:scale-95 disabled:opacity-50"
+            className="w-full rounded-lg bg-blue-600 px-4 py-3 text-base font-bold text-white transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? 'Saving...' : 'Finish Registration'}
+            {loading ? 'Creating Profile...' : 'Complete Profile'}
           </button>
         </form>
       </div>
@@ -199,5 +224,4 @@ const CompleteProfile = () => {
   )
 }
 
-import { memo } from 'react';
-export default memo(CompleteProfile);
+export default CompleteProfile

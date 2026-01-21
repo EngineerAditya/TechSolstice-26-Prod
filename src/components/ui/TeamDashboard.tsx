@@ -1,11 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, ArrowLeft, Loader2, UserMinus, ShieldAlert, LogOut, Lock } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+// Supabase client for database operations
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 interface Member {
   user_id: string;
@@ -34,7 +40,6 @@ interface Props {
 }
 
 export default function TeamDashboard({ eventId, eventName, minSize, maxSize, onBack, isLocked }: Props) {
-  const supabase = createClient();
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);

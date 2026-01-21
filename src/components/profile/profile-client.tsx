@@ -61,8 +61,8 @@ export default function ProfileClient({ userData, joinedEvents }: ProfileClientP
   // Sign out handler
   const handleSignOut = async () => {
     try {
-      await fetch('/api/auth/signout', { method: 'POST' });
-      window.location.href = '/';
+      const { signOut } = await import('next-auth/react');
+      await signOut({ callbackUrl: '/' });
     } catch (error) {
       console.error('Sign out failed:', error);
     }

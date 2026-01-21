@@ -1,27 +1,29 @@
-import { createClient } from "@/utils/supabase/server";
+import { requireAuth, getUserProfile, isProfileComplete } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Layout } from "@/components/layout";
 import ProfileClient from "@/components/profile/profile-client";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase client for database operations only (not auth)
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 // Ensure fresh data on navigation
 export const dynamic = "force-dynamic";
 
 const ProfilePage = async () => {
-  const supabase = await createClient();
+  // 1. Get Current User via NextAuth
+  const session = await requireAuth();
+  const userId = session.user.id;
 
-  // 1. Get Current User
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  // 2. Check if profile is complete
+  const profile = await getUserProfile(userId);
 
-  if (authError || !user) {
-    redirect("/login");
+  if (!profile || !isProfileComplete(profile)) {
+    redirect("/complete-profile");
   }
-
-  // 2. Fetch User Profile Details
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("*")
-    .eq("id", user.id)
-    .single();
 
   // 3. Fetch Registered Events & Teams
   // We join: team_members -> teams -> events
@@ -44,7 +46,7 @@ const ProfilePage = async () => {
         max_team_size
       )
     `)
-    .eq("user_id", user.id);
+    .eq("user_id", userId);
 
   // Normalize data structure for Client Component to prevent type errors
   const joinedEvents = (rawMemberships || []).map((m: any) => ({

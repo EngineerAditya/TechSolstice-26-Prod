@@ -10,6 +10,7 @@ import { Footer } from '@/components/footer';
 import Logo from '@/components/ui/logo';
 import { ScrollToTop } from '@/components/scroll-to-top';
 import { Analytics } from "@vercel/analytics/next"
+import { Providers } from "@/components/providers"
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -79,36 +80,38 @@ const RootLayout = ({
         }} />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <LenisProvider>
-          <SpeedInsights />
-          <Analytics />
-          <ScrollToTop />
-          {/* Background layer - lowest z-index */}
-          <ASMRStaticBackground />
+        <Providers>
+          <LenisProvider>
+            <SpeedInsights />
+            <Analytics />
+            <ScrollToTop />
+            {/* Background layer - lowest z-index */}
+            <ASMRStaticBackground />
 
-          {/* Fixed Logo - same as homepage */}
-          <div className="fixed top-4 left-4 md:top-6 md:left-8 z-50 flex items-center">
-            <Logo />
-          </div>
+            {/* Fixed Logo - same as homepage */}
+            <div className="fixed top-4 left-4 md:top-6 md:left-8 z-50 flex items-center">
+              <Logo />
+            </div>
 
-          {/* Global sticky navbar - high z-index to stay on top */}
-          <div className="relative z-50">
-            <TechSolsticeNavbar />
-          </div>
+            {/* Global sticky navbar - high z-index to stay on top */}
+            <div className="relative z-50">
+              <TechSolsticeNavbar />
+            </div>
 
-          {/* Main content area - medium z-index; navbar is fixed so no top padding needed */}
-          <div className="relative z-10">
-            {children}
-          </div>
+            {/* Main content area - medium z-index; navbar is fixed so no top padding needed */}
+            <div className="relative z-10">
+              {children}
+            </div>
 
-          {/* Footer at the bottom */}
-          <div className="relative z-10">
-            <Footer />
-          </div>
+            {/* Footer at the bottom */}
+            <div className="relative z-10">
+              <Footer />
+            </div>
 
-          {/* Chatbot widget - highest z-index */}
-          <ChatbotWidget />
-        </LenisProvider>
+            {/* Chatbot widget - highest z-index */}
+            <ChatbotWidget />
+          </LenisProvider>
+        </Providers>
       </body>
     </html>
   );

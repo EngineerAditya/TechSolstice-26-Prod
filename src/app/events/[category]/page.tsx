@@ -1,15 +1,22 @@
 import { notFound } from "next/navigation";
-import { createClient } from "@/utils/supabase/server";
+import { getSession } from "@/lib/auth";
 import { getCategoryBySlug } from "@/lib/constants/categories";
 import { type Event } from "@/components/event-card";
 import { CategoryPageClient } from "@/components/categories/category-page-client";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase client for database operations only
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 // CRITICAL: Forces fresh data on every request to handle registration state changes instantly.
 export const dynamic = "force-dynamic";
 
 async function getData(categorySlug: string) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const session = await getSession();
+  const user = session?.user;
 
   // Get category details
   const category = getCategoryBySlug(categorySlug);

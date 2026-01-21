@@ -1,19 +1,25 @@
-import { createClient } from "@/utils/supabase/server";
+import { getSession } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase client for database operations only
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 export async function GET(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const session = await getSession();
 
-    if (authError || !user) {
+    if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { data: tickets, error } = await supabase
       .from("support_tickets")
       .select("*")
-      .eq("user_id", user.id)
+      .eq("user_id", session.user.id)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -30,10 +36,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    const session = await getSession();
 
-    if (authError || !user) {
+    if (!session || !session.user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
     const { data, error } = await supabase
       .from("support_tickets")
       .insert({
-        user_id: user.id,
+        user_id: session.user.id,
         description,
         category,
         status: "Open", // Default status

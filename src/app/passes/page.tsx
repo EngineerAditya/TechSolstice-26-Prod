@@ -1,29 +1,22 @@
-import { createClient } from '@/utils/supabase/server'
+import { requireAuth, getUserProfile, isAdmin } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-// import { Hourglass } from 'ldrs/react'
-// import 'ldrs/react/Hourglass.css'
+import { createClient } from '@supabase/supabase-js'
+
+// Supabase client for database operations only
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 const PassesPage = async () => {
   /* // --- COMMENTED OUT LOGIC FOR FUTURE USE ---
-  const supabase = await createClient()
+  const session = await requireAuth()
+  const userId = session.user.id
 
-  // 1. Get User
-  const { data: { user } } = await supabase.auth.getUser()
-  if (!user) redirect('/login')
-
-  // 2. Get Profile & Admin Status
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
-
-  const { data: admin } = await supabase
-    .from('admins')
-    .select('id')
-    .eq('id', user.id)
-    .single()
+  // 1. Get Profile & Admin Status
+  const profile = await getUserProfile(userId)
+  const adminStatus = await isAdmin(userId)
   
   const isvisible = false; 
   */

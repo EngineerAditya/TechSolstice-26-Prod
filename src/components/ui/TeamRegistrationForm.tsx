@@ -1,11 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@supabase/supabase-js";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Trash2, ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+// Supabase client for database operations
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
 
 interface Props {
   eventId: string;
@@ -19,7 +25,6 @@ interface Props {
 export default function TeamRegistrationForm({
   eventId, eventName, minSize, maxSize, onBack, onSuccess
 }: Props) {
-  const supabase = createClient();
   const router = useRouter();
 
   const [teamName, setTeamName] = useState("");
