@@ -11,11 +11,18 @@ const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 )
 
+// Manipal departments in alphabetical order
+const MANIPAL_DEPARTMENTS = ['DLHS', 'DOC', 'MIT', 'MIRM', 'MLS', 'SMI']
+
 const CompleteProfile = () => {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  // Manipal student choice
+  const [isUniversityStudent, setIsUniversityStudent] = useState<boolean | null>(null)
+  const [selectedDepartment, setSelectedDepartment] = useState<string>('')
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -56,6 +63,26 @@ const CompleteProfile = () => {
     checkProfile()
   }, [session, router])
 
+  // Auto-fill college name when department is selected (if Manipal student)
+  useEffect(() => {
+    if (isUniversityStudent && selectedDepartment) {
+      setFormData(prev => ({ 
+        ...prev, 
+        collegeName: `MAHE-${selectedDepartment}` 
+      }))
+    } else if (!isUniversityStudent) {
+      setFormData(prev => ({ 
+        ...prev, 
+        collegeName: '' 
+      }))
+    }
+  }, [isUniversityStudent, selectedDepartment])
+
+  const handleCancel = async () => {
+    const { signOut } = await import('next-auth/react')
+    await signOut({ callbackUrl: '/' })
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -71,6 +98,13 @@ const CompleteProfile = () => {
     // Validate mobile number format (10 digits)
     if (!/^[0-9]{10}$/.test(formData.mobileNumber)) {
       setError('Mobile number must be exactly 10 digits')
+      setLoading(false)
+      return
+    }
+
+    // If Manipal student, validate department selection
+    if (isUniversityStudent && !selectedDepartment) {
+      setError('Please select a department')
       setLoading(false)
       return
     }
@@ -91,6 +125,7 @@ const CompleteProfile = () => {
           mobile_number: formData.mobileNumber,
           college_name: formData.collegeName,
           registration_number: formData.registrationNumber || null,
+          is_university_student: isUniversityStudent,
         })
 
       if (insertError) {
@@ -139,6 +174,66 @@ const CompleteProfile = () => {
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-8 space-y-6">
 
+          {/* Manipal Student Choice */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">
+              Are you a MAHE student? <span className="text-red-500">*</span>
+            </label>
+            <div className="flex gap-4">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUniversityStudent(true)
+                  setSelectedDepartment('')
+                }}
+                className={`flex-1 py-3 px-4 rounded-lg font-bold transition-all ${
+                  isUniversityStudent === true
+                    ? 'bg-blue-600 text-white border-2 border-blue-500'
+                    : 'bg-gray-800 text-gray-300 border-2 border-gray-600 hover:border-gray-500'
+                }`}
+              >
+                Yes, I'm a MAHE Student
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsUniversityStudent(false)
+                  setSelectedDepartment('')
+                }}
+                className={`flex-1 py-3 px-4 rounded-lg font-bold transition-all ${
+                  isUniversityStudent === false
+                    ? 'bg-blue-600 text-white border-2 border-blue-500'
+                    : 'bg-gray-800 text-gray-300 border-2 border-gray-600 hover:border-gray-500'
+                }`}
+              >
+                No, I'm Not
+              </button>
+            </div>
+          </div>
+
+          {/* Department Selection (only if Manipal student selected) */}
+          {isUniversityStudent === true && (
+            <div>
+              <label htmlFor="department" className="block text-sm font-medium text-gray-300">
+                Department <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="department"
+                value={selectedDepartment}
+                onChange={(e) => setSelectedDepartment(e.target.value)}
+                className="mt-1 block w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              >
+                <option value="">Select your department</option>
+                {MANIPAL_DEPARTMENTS.map((dept) => (
+                  <option key={dept} value={dept}>
+                    {dept}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Full Name */}
           <div>
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-300">
@@ -181,11 +276,24 @@ const CompleteProfile = () => {
               type="text"
               id="collegeName"
               value={formData.collegeName}
-              onChange={(e) => setFormData({ ...formData, collegeName: e.target.value })}
-              className="mt-1 block w-full rounded-lg border border-gray-600 bg-gray-800 px-4 py-3 text-white placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your college name"
+              onChange={(e) => {
+                // If Manipal student, don't allow editing
+                if (!isUniversityStudent) {
+                  setFormData({ ...formData, collegeName: e.target.value })
+                }
+              }}
+              disabled={isUniversityStudent}
+              className={`mt-1 block w-full rounded-lg border border-gray-600 px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isUniversityStudent 
+                  ? 'bg-gray-700 cursor-not-allowed opacity-75 focus:border-gray-600'
+                  : 'bg-gray-800 focus:border-blue-500'
+              }`}
+              placeholder="College name will auto-fill if MAHE student"
               required
             />
+            {isUniversityStudent && (
+              <p className="mt-1 text-xs text-gray-500">Auto-filled based on your department</p>
+            )}
           </div>
 
           {/* Registration Number (Optional) */}
@@ -210,14 +318,24 @@ const CompleteProfile = () => {
             </div>
           )}
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-blue-600 px-4 py-3 text-base font-bold text-white transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Creating Profile...' : 'Complete Profile'}
-          </button>
+          {/* Submit and Cancel Buttons */}
+          <div className="flex gap-3">
+            <button
+              type="submit"
+              disabled={loading || isUniversityStudent === null}
+              className="flex-1 rounded-lg bg-blue-600 px-4 py-3 text-base font-bold text-white transition-all hover:bg-blue-700 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Creating Profile...' : 'Complete Profile'}
+            </button>
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={loading}
+              className="flex-1 rounded-lg bg-gray-700 px-4 py-3 text-base font-bold text-white transition-all hover:bg-gray-600 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </div>
