@@ -32,19 +32,19 @@ export default function LoadingScreen({ fadeOut = false }) {
         <motion.div
           key="loader"
           initial={{ opacity: 1 }}
-          exit={{ 
+          exit={{
             opacity: 0,
             scale: 1.05,
-            transition: { 
-              duration: 1.2, 
+            transition: {
+              duration: 1.2,
               ease: [0.16, 1, 0.3, 1],
               when: "afterChildren"
-            } 
+            }
           }}
           className="fixed inset-0 z-9999 flex items-center justify-center bg-black overflow-hidden"
         >
           {/* Subtle Ambient Background Glow */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 2, ease: "easeOut" }}
@@ -56,9 +56,9 @@ export default function LoadingScreen({ fadeOut = false }) {
             <motion.div
               initial={{ opacity: 0, scale: 0.9, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              transition={{ 
-                duration: 1, 
-                ease: [0.16, 1, 0.3, 1] 
+              transition={{
+                duration: 1,
+                ease: [0.16, 1, 0.3, 1]
               }}
               className="relative w-72 h-32 md:w-96 md:h-44 px-4"
             >
@@ -69,14 +69,14 @@ export default function LoadingScreen({ fadeOut = false }) {
                 className="object-contain"
                 priority
               />
-              
+
               {/* Animated Progress Line */}
-              <motion.div 
+              <motion.div
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: "100%", opacity: 1 }}
-                transition={{ 
+                transition={{
                   delay: 0.5,
-                  duration: 2, 
+                  duration: 2,
                   ease: "easeInOut"
                 }}
                 className="absolute -bottom-4 left-0 h-px bg-linear-to-r from-transparent via-red-600/50 to-transparent"
@@ -90,7 +90,7 @@ export default function LoadingScreen({ fadeOut = false }) {
               transition={{ delay: 1, duration: 1 }}
               className="mt-8 text-[10px] text-white uppercase tracking-[0.5em] font-black italic michroma-regular"
             >
-              Loading Terminal
+              Loading...
             </motion.p>
           </div>
 
