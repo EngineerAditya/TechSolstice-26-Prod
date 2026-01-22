@@ -48,18 +48,18 @@ export function CategoryCard({ category, index, size = 'md', isFeatured = false 
           gap={pixelConfig.gap}
           className="w-full h-full border-white/20 transition-all duration-500 hover:border-white/40 hover:shadow-2xl relative"
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black/60 pointer-events-none z-[1]" />
+          <div className="absolute inset-0 bg-linear-to-b from-transparent via-black/20 to-black/60 pointer-events-none z-1" />
 
-          <div className="absolute inset-0 z-[2] flex flex-col p-6 sm:p-8 h-full w-full">
+          <div className="absolute inset-0 z-2 flex flex-col p-6 sm:p-8 h-full w-full">
 
             {/* Top Row: Title */}
-            <div className={`flex ${isFeatured ? 'justify-center items-center mt-8' : 'justify-between items-start'} gap-4 relative`}>
+            <div className={`flex ${isFeatured ? 'justify-center items-center' : 'justify-between items-start'} gap-4 relative`}>
 
               {/* Title Container */}
               <div className={`flex-1 min-w-0 ${isFeatured ? 'text-center' : ''}`}>
-                <h3 className={`michroma-regular text-white/95 leading-snug break-words drop-shadow-md 
+                <h3 className={`michroma-regular text-white/95 leading-snug wrap-break-word drop-shadow-md 
                   ${isFeatured
-                    ? 'text-3xl sm:text-4xl lg:text-5xl' // Larger text for featured
+                    ? 'text-3xl sm:text-4xl lg:text-5xl mt-2' // Reduced margin for featured flagship
                     : 'text-lg sm:text-xl lg:text-2xl'   // Standard text
                   }`}>
                   {category.title}
@@ -77,24 +77,13 @@ export function CategoryCard({ category, index, size = 'md', isFeatured = false 
             </div>
 
             {/* Spacer */}
-            <div className="flex-grow" />
+            <div className="grow" />
 
-            {/* Bottom: Description & Indicator */}
-            <div className={`mt-4 space-y-4 ${isFeatured ? 'text-center max-w-2xl mx-auto' : ''}`}>
-              <p className="text-sm sm:text-base text-white/70 leading-relaxed line-clamp-3 group-hover:text-white/90 transition-colors">
+            {/* Bottom: Description */}
+            <div className={`mt-4 ${isFeatured ? 'text-center max-w-3xl mx-auto' : ''}`}>
+              <p className="text-sm sm:text-base text-white/60 leading-relaxed line-clamp-3 group-hover:text-white/90 transition-colors duration-500">
                 {category.description}
               </p>
-
-              <div className="flex items-center gap-3 opacity-60 group-hover:opacity-100 transition-opacity">
-                <div className="h-[2px] w-full bg-white/10 rounded-full overflow-hidden">
-                  <motion.div
-                    className={`h-full bg-gradient-to-r ${category.gradient || 'from-blue-400 to-purple-500'}`}
-                    initial={{ width: "0%" }}
-                    whileInView={{ width: "100%" }}
-                    transition={{ duration: 1, delay: 0.2 + (index * 0.1) }}
-                  />
-                </div>
-              </div>
             </div>
 
           </div>

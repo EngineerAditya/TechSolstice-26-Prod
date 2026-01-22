@@ -44,15 +44,12 @@ export const Footer = () => {
   return (
     <footer
       id="footer"
-      // FIXED: Removed 'max-h-[50vh]' so it can grow when zoomed. 
-      // Removed 'overflow-hidden' to prevent clipping content. 
-      // Added 'pb-safe' concept via padding.
-      className="w-full bg-black/40 backdrop-blur-md border-t border-white/10 relative z-10"
+      className="w-full bg-white/2 backdrop-blur-xl border-t border-white/5 relative z-10"
     >
-      {/* Subtle top border glow - wrapped in overflow-hidden div to prevent scrollbars */}
+      {/* Subtle top border glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2">
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-neutral-500/20 to-transparent opacity-70" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl">
+          <div className="h-px w-full bg-linear-to-r from-transparent via-red-500/10 to-transparent" />
         </div>
       </div>
 
@@ -68,7 +65,7 @@ export const Footer = () => {
             <div className="flex items-center justify-center gap-4">
               <a
                 href="/"
-                className="relative h-10 w-auto aspect-[3/1] hover:opacity-90 transition-opacity"
+                className="relative h-10 w-auto aspect-3/1 hover:opacity-90 transition-opacity"
                 aria-label="Go to homepage"
               >
                 <Image
@@ -99,26 +96,31 @@ export const Footer = () => {
             </div>
 
             {/* Address below logos */}
-            <div className="text-center text-xs text-neutral-400 space-y-1">
+            <a 
+              href="https://maps.app.goo.gl/3s3Ew5LkqtLbJEor6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block text-center text-[10px] text-neutral-500 font-medium uppercase tracking-wider space-y-1 hover:text-neutral-300 transition-colors"
+            >
               {siteConfig.contactData.address.map((line, i) => (
                 <div key={i}>{line}</div>
               ))}
-            </div>
+            </a>
           </div>
 
           {/* Divider */}
-          <div className="h-px w-16 mx-auto bg-gradient-to-r from-transparent via-neutral-600 to-transparent" />
+          <div className="h-px w-16 mx-auto bg-white/5" />
 
           {/* Contact Info - Mobile */}
           <div className="text-center space-y-5">
-            <h3 className="text-base font-semibold text-white">Contact Us</h3>
+            <h3 className="text-xs font-black uppercase tracking-[0.3em] text-neutral-500 michroma-regular">Contact Us</h3>
 
             {/* Email */}
             <a
               href={`mailto:${siteConfig.contactData.generalEmail}`}
-              className="flex items-center justify-center gap-2 text-xs text-neutral-400 hover:text-white transition-colors"
+              className="flex items-center justify-center gap-2 text-[10px] text-neutral-400 font-medium uppercase tracking-wider hover:text-white transition-colors"
             >
-              <Mail className="h-3 w-3 flex-shrink-0" />
+              <Mail className="h-3 w-3 shrink-0 text-red-500/50" />
               <span>{siteConfig.contactData.generalEmail}</span>
             </a>
 
@@ -128,19 +130,19 @@ export const Footer = () => {
                 <div key={idx} className="space-y-1.5">
                   <a
                     href={`tel:${contact.phone}`}
-                    className="flex items-center justify-center gap-2 text-white text-sm font-medium hover:text-neutral-300 transition-colors"
+                    className="flex items-center justify-center gap-2 text-white text-[13px] font-bold hover:text-neutral-300 transition-colors"
                   >
-                    <Phone className="h-3 w-3 text-neutral-400" />
-                    <span>{contact.phone}</span>
+                    <Phone className="h-3 w-3 text-red-500/50" />
+                    <span className="michroma-regular tracking-tighter">{contact.phone}</span>
                   </a>
-                  <div className="text-xs text-neutral-400">
-                    {contact.name} <span className="text-neutral-500">•</span> {contact.role}
+                  <div className="text-[10px] text-neutral-500 font-black uppercase tracking-widest">
+                    {contact.name} <span className="text-neutral-800 mx-1">/</span> {contact.role}
                   </div>
                   <a
                     href={`mailto:${contact.email}`}
-                    className="flex items-center justify-center gap-2 text-xs text-neutral-400 hover:text-white transition-colors break-all"
+                    className="flex items-center justify-center gap-2 text-[10px] text-neutral-500 font-medium hover:text-white transition-colors break-all"
                   >
-                    <Mail className="h-3 w-3 flex-shrink-0" />
+                    <Mail className="h-3 w-3 shrink-0 text-neutral-700" />
                     <span>{contact.email}</span>
                   </a>
                 </div>
@@ -182,7 +184,7 @@ export const Footer = () => {
                 <div className="flex items-center gap-3 lg:gap-4">
                   <a
                     href="/"
-                    className="relative h-12 lg:h-14 w-auto aspect-[3/1] hover:opacity-90 transition-opacity"
+                    className="relative h-12 lg:h-14 w-auto aspect-3/1 hover:opacity-90 transition-opacity"
                     aria-label="Go to homepage"
                   >
                     <Image
@@ -213,27 +215,32 @@ export const Footer = () => {
                 </div>
 
                 {/* Address */}
-                <div className="text-sm lg:text-base text-neutral-400 space-y-1 leading-relaxed">
+                <a 
+                  href="https://maps.app.goo.gl/3s3Ew5LkqtLbJEor6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-[11px] lg:text-[13px] text-neutral-500 font-medium leading-relaxed tracking-wide hover:text-neutral-300 transition-colors"
+                >
                   {siteConfig.contactData.address.map((line, i) => (
                     <div key={i}>{line}</div>
                   ))}
-                </div>
+                </a>
               </div>
 
               {/* Center: Vertical Divider */}
-              <div className="self-stretch w-px bg-gradient-to-b from-transparent via-neutral-700 to-transparent mx-auto" />
+              <div className="self-stretch w-px bg-white/5 mx-auto" />
 
               {/* Right: Contact Info */}
               <div className="space-y-4 lg:space-y-5 text-right">
-                <h3 className="text-lg lg:text-xl font-semibold text-white">Contact Us</h3>
+                <h3 className="text-xs lg:text-sm font-black uppercase tracking-[0.4em] text-neutral-500 michroma-regular">Contact Us</h3>
 
                 {/* Email */}
                 <a
                   href={`mailto:${siteConfig.contactData.generalEmail}`}
-                  className="flex items-center justify-end gap-2 text-xs lg:text-sm text-neutral-400 hover:text-white transition-colors group"
+                  className="flex items-center justify-end gap-2 text-[10px] lg:text-xs text-neutral-400 font-medium uppercase tracking-wider hover:text-white transition-colors group"
                 >
                   <span>{siteConfig.contactData.generalEmail}</span>
-                  <Mail className="h-4 w-4 flex-shrink-0 group-hover:text-white transition-colors" />
+                  <Mail className="h-4 w-4 shrink-0 text-red-500/50 group-hover:text-red-500 transition-colors" />
                 </a>
 
                 {/* Contacts */}
@@ -242,20 +249,20 @@ export const Footer = () => {
                     <div key={idx} className="space-y-1">
                       <a
                         href={`tel:${contact.phone}`}
-                        className="flex items-center justify-end gap-2 text-white text-sm font-medium hover:text-neutral-300 transition-colors group"
+                        className="flex items-center justify-end gap-2 text-white text-sm font-bold hover:text-neutral-300 transition-colors group"
                       >
-                        <span>{contact.phone}</span>
-                        <Phone className="h-4 w-4 text-neutral-400 group-hover:text-white transition-colors" />
+                        <span className="michroma-regular tracking-tighter">{contact.phone}</span>
+                        <Phone className="h-4 w-4 text-red-500/50 group-hover:text-red-500 transition-colors" />
                       </a>
-                      <div className="text-xs lg:text-sm text-neutral-400">
-                        {contact.name} <span className="text-neutral-600">•</span> {contact.role}
+                      <div className="text-[10px] lg:text-[11px] text-neutral-500 font-bold uppercase tracking-widest">
+                        {contact.name} <span className="text-neutral-800 mx-1">/</span> {contact.role}
                       </div>
                       <a
                         href={`mailto:${contact.email}`}
-                        className="flex items-center justify-end gap-2 text-xs lg:text-sm text-neutral-400 hover:text-white transition-colors"
+                        className="flex items-center justify-end gap-2 text-[10px] lg:text-xs text-neutral-400 font-medium hover:text-white transition-colors group"
                       >
                         <span>{contact.email}</span>
-                        <Mail className="h-4 w-4 text-neutral-400 group-hover:text-white transition-colors" />
+                        <Mail className="h-4 w-4 text-neutral-700 group-hover:text-neutral-400 transition-colors" />
                       </a>
                     </div>
                   ))}
@@ -289,9 +296,8 @@ export const Footer = () => {
 
       {/* Flickering Grid Background - Only on tablet+ */}
       {isTabletOrLarger && (
-        // FIXED: Changed fixed height to min-height so it respects content flow
         <div
-          className="w-full h-[150px] md:h-[180px] relative z-0 mt-4"
+          className="w-full h-37.5 md:h-45 relative z-0 mt-4"
           style={{
             WebkitMaskImage: "linear-gradient(to bottom, transparent, black 20%)",
             maskImage: "linear-gradient(to bottom, transparent, black 20%)",
