@@ -39,13 +39,18 @@ export function ScrollPathAnimation() {
         // 1. Build Path Data relative to container
         const pathPoints = markers.map((marker) => {
           const rect = marker.getBoundingClientRect();
-          // Calculate center-to-center distance
-          const x = (rect.left - containerRect.left) + (rect.width / 2) - (box.offsetWidth / 2);
-          const y = (rect.top - containerRect.top) + (rect.height / 2) - (box.offsetHeight / 2);
+          // Calculate center positions
+          const markerCenterX = rect.left + rect.width / 2;
+          const markerCenterY = rect.top + rect.height / 2;
+          
+          // Convert to container-relative coordinate
+          const x = markerCenterX - containerRect.left - box.offsetWidth / 2;
+          const y = markerCenterY - containerRect.top - box.offsetHeight / 2;
+          
           return { x, y };
         });
 
-        // 2. Set Initial Position to the first marker
+        // 2. Set Initial Position
         if (pathPoints.length > 0) {
           gsap.set(box, { x: pathPoints[0].x, y: pathPoints[0].y });
         }
@@ -54,20 +59,20 @@ export function ScrollPathAnimation() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: container,
-            start: "top center", // Start when container hits center of viewport
-            end: "bottom center", // End when container bottom hits center
-            scrub: 0.8, // Slightly smoother scrub
+            start: "top 60%", // Earlier start for smoother entry
+            end: "bottom 40%",
+            scrub: 1.5, // High scrub for buttery smoothness
+            invalidateOnRefresh: true,
           }
         });
 
         tl.to(box, {
           motionPath: {
             path: pathPoints,
-            curviness: 1.25,
+            curviness: 0, // Force linear path between markers to ensure it hits them perfectly
             autoRotate: false,
-            alignOrigin: [0.5, 0.5],
           },
-          ease: "linear", // Linear ease ensures constant speed along the path
+          ease: "none",
         });
 
       }, containerRef);
@@ -101,10 +106,10 @@ export function ScrollPathAnimation() {
 
       {/* Top Intro Section */}
       <div className={styles.introSpacer}>
-        <h3 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight">
+        <h3 className="text-3xl md:text-5xl font-bold text-white mb-3 tracking-tight michroma-regular uppercase">
           Explore Categories
         </h3>
-        <p className="text-red-500 font-mono text-xs uppercase tracking-[0.2em] animate-pulse">
+        <p className="text-red-500 font-bold text-[10px] uppercase tracking-[0.4em] animate-pulse">
           Scroll to navigate
         </p>
         <div className="w-[1px] h-12 bg-gradient-to-b from-red-600 via-red-900 to-transparent mx-auto mt-6" />
@@ -135,7 +140,7 @@ export function ScrollPathAnimation() {
               style={{ top: `${topPos}%` }}
             >
               <div className={styles.textCard}>
-                <h4 className={styles.categoryTitle}>{category.title}</h4>
+                <h4 className={`${styles.categoryTitle} michroma-regular`}>{category.title}</h4>
                 <p className={styles.categoryDesc}>{category.description}</p>
                 <Link href={`/events/${category.slug}`} className={styles.ctaLink}>
                   Explore &rarr;
@@ -154,16 +159,16 @@ export function ScrollPathAnimation() {
       </div>
 
       {/* Bottom CTA Section */}
-      <div className="relative z-10 py-24 flex flex-col items-center justify-center text-center px-4 bg-gradient-to-t from-black via-black/90 to-transparent">
-        <h2 className="text-3xl md:text-5xl font-bold text-white mb-8 drop-shadow-lg">
+      <div className="relative z-10 py-32 flex flex-col items-center justify-center text-center px-4 bg-gradient-to-t from-black via-black/95 to-transparent">
+        <h2 className="text-3xl md:text-5xl font-bold text-white mb-10 drop-shadow-lg michroma-regular uppercase tracking-tight">
           Ready to Compete?
         </h2>
         <Link
           href="/events"
-          className="group relative inline-flex items-center justify-center px-10 py-4 bg-red-600 text-white font-bold text-lg rounded-full overflow-hidden transition-all duration-300 hover:bg-red-700 hover:scale-105 hover:shadow-[0_0_30px_rgba(220,38,38,0.6)]"
+          className="group relative inline-flex items-center justify-center px-12 py-5 bg-red-600 text-white font-bold text-[11px] uppercase tracking-[0.4em] rounded-full overflow-hidden transition-all duration-300 hover:bg-red-700 hover:scale-105 hover:shadow-[0_0_40px_rgba(220,38,38,0.4)] md:px-14 md:py-6"
         >
-          <span className="relative z-10">View All Events</span>
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <span className="relative z-10 michroma-regular">View All Events</span>
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         </Link>
       </div>
 

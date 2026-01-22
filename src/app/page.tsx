@@ -107,7 +107,7 @@ const Home = () => {
             </div>
           )}
 
-          <div >
+          <div>
             <ZoomParallax
               images={[
                 { src: '/photos/IMG_0162.jpg', alt: 'TechSolstice Crowd' },
@@ -121,7 +121,7 @@ const Home = () => {
             />
           </div>
 
-          <div className="mt-16 pb-20">
+          <div className="pb-0">
             <SponsorsSection />
           </div>
         </div>

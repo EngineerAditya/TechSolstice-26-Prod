@@ -136,73 +136,55 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
   // MOBILE RENDER 
   // --------------------------------------------------------------------------
 
-  if (isMobile) {
+if (isMobile) {
     return (
-      <div ref={containerRef} className="w-full min-h-[50vh] bg-black py-16 px-4 flex flex-col items-center justify-center relative overflow-hidden">
-
-        {/* 1. Base Dark Background */}
-        <div className="absolute inset-0 bg-neutral-950" />
-
-        {/* 2. The SVG Grid Pattern - High Visibility */}
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-center opacity-[0.25]" />
-
-        {/* 3. Radial Vignette */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_100%)] opacity-90" />
-
-        {/* 4. Ambient Red Glow */}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[150px] bg-red-900/10 blur-[60px] rounded-full pointer-events-none" />
+      <div ref={containerRef} className="w-full min-h-[70vh] bg-black py-20 px-4 flex flex-col items-center justify-center relative overflow-hidden">
+        {/* Backdrop Grid */}
+        <div className="absolute inset-0 bg-[#020202]">
+          <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] opacity-[0.1]" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,#000000_100%)]" />
+        </div>
 
         <div className="text-center relative z-10 w-full max-w-sm">
-          {/* Date Pill */}
-          <div className="inline-flex items-center justify-center gap-2 px-4 py-1.5 rounded-full border border-white/10 bg-black/40 backdrop-blur-md mb-8 shadow-lg">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-            <p className="text-white/80 text-[10px] font-semibold tracking-[0.2em] uppercase">Feb 20, 2026</p>
+          {/* Top Label */}
+          <div className="flex flex-col items-center mb-8">
+            <div className="flex items-center gap-2 mb-4 px-3 py-1 rounded-full border border-white/5 bg-white/5 backdrop-blur-md">
+              <div className="w-1 h-1 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[9px] font-bold text-neutral-400 tracking-[0.4em] uppercase">The Countdown</span>
+            </div>
+            
+            <h3 className="text-2xl font-bold tracking-[0.1em] text-white michroma-regular uppercase mb-2">
+              TechSolstice '26
+            </h3>
+            <p className="text-[10px] text-red-500/80 tracking-[0.3em] font-bold uppercase mb-1">MIT Bengaluru</p>
+            <p className="text-[9px] text-neutral-500 tracking-[0.2em] uppercase">Feb 20 - 22, 2026</p>
           </div>
 
           {!countdown.finished ? (
-            <div className="relative group">
-              {/* Border Gradient */}
-              <div className="absolute -inset-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent rounded-[2rem] opacity-50 blur-[1px]" />
+            <div className="relative">
+              {/* Sleek Glass Card for Mobile */}
+              <div className="relative p-8 rounded-3xl bg-white/[0.02] backdrop-blur-xl border border-white/[0.05] shadow-2xl">
+                {/* corner accents */}
+                <div className="absolute top-4 left-4 w-2 h-2 border-t border-l border-white/10" />
+                <div className="absolute top-4 right-4 w-2 h-2 border-t border-r border-white/10" />
+                <div className="absolute bottom-4 left-4 w-2 h-2 border-b border-l border-white/10" />
+                <div className="absolute bottom-4 right-4 w-2 h-2 border-b border-r border-white/10" />
 
-              <div className="relative text-center p-8 rounded-[2rem] bg-[#050505]/80 backdrop-blur-xl border border-white/10 shadow-2xl overflow-hidden">
-
-                {/* Top Shine */}
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-                {/* --- STATIC DESIGN ELEMENTS (Now on Mobile too) --- */}
-                <div className="absolute top-4 left-4 w-3 h-3 border-t border-l border-white/20 rounded-tl-md" />
-                <div className="absolute top-4 right-4 w-3 h-3 border-t border-r border-white/20 rounded-tr-md" />
-                <div className="absolute bottom-4 left-4 w-3 h-3 border-b border-l border-white/20 rounded-bl-md" />
-                <div className="absolute bottom-4 right-4 w-3 h-3 border-b border-r border-white/20 rounded-br-md" />
-
-                {/* Header */}
-                <div className="mb-8 relative z-10">
-                  <h3 className="text-xs font-bold tracking-[0.4em] text-transparent bg-clip-text bg-gradient-to-r from-white/80 via-white to-white/80 uppercase">
-                    TechSolstice '26
-                  </h3>
-
-                  {/* Fancy Separator (Now on Mobile) */}
-                  <div className="flex items-center justify-center gap-2 mt-3 opacity-50">
-                    <div className="h-px w-6 bg-gradient-to-r from-transparent to-red-500" />
-                    <div className="h-1 w-1 bg-red-500 rounded-full" />
-                    <div className="h-px w-6 bg-gradient-to-l from-transparent to-red-500" />
-                  </div>
-                </div>
-
-                {/* Timer */}
-                <div className="flex items-start justify-between gap-2 text-white relative z-10">
+                <div className="flex items-center justify-between gap-1">
                   <ResponsiveCounterUnit value={countdown.days} label="Days" />
                   <Separator mobile />
-                  <ResponsiveCounterUnit value={countdown.hours} label="Hrs" />
+                  <ResponsiveCounterUnit value={countdown.hours} label="Hours" />
                   <Separator mobile />
-                  <ResponsiveCounterUnit value={countdown.minutes} label="Min" />
+                  <ResponsiveCounterUnit value={countdown.minutes} label="Mins" />
                   <Separator mobile />
-                  <ResponsiveCounterUnit value={countdown.seconds} label="Sec" />
+                  <ResponsiveCounterUnit value={countdown.seconds} label="Secs" />
                 </div>
               </div>
             </div>
           ) : (
-            <div className="text-2xl font-light text-white tracking-wide">Event Started</div>
+            <div className="text-xl font-bold text-white tracking-widest uppercase michroma-regular">
+              Now Live
+            </div>
           )}
         </div>
       </div>
@@ -254,56 +236,53 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
           );
         })}
 
-        {/* "Mark Your Calendar" Text */}
-        <motion.div
-          style={{ opacity: stayTunedOpacity }}
-          className="absolute top-[15vh] left-0 right-0 text-center z-20 pointer-events-none"
-        >
-          <div className="inline-flex items-center justify-center gap-3 px-6 py-2 rounded-full border border-white/10 bg-black/50 backdrop-blur-md shadow-2xl">
-            <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_rgba(239,68,68,0.6)]" />
-            <p className="text-white/80 text-[10px] md:text-xs font-semibold tracking-[0.3em] uppercase">Feb 20, 2026</p>
-          </div>
-        </motion.div>
-
         {/* Countdown Timer Overlay */}
         <motion.div
           style={{ opacity: timerOpacity }}
           className="absolute inset-0 flex items-center justify-center z-20"
         >
           {!countdown.finished ? (
-            <div className="relative group">
-              <div className="absolute -inset-[1px] bg-gradient-to-b from-white/20 via-white/5 to-transparent rounded-[2.5rem] opacity-50 blur-[1px]" />
+            <div className="relative group text-center">
+              {/* Event Info Header */}
+              <div className="mb-12">
+                <div className="flex items-center justify-center gap-4 mb-6">
+                  <div className="h-px w-12 bg-gradient-to-r from-transparent to-white/20" />
+                  <span className="text-[10px] uppercase tracking-[0.6em] text-red-500 font-bold">The Grand Reveal</span>
+                  <div className="h-px w-12 bg-gradient-to-l from-transparent to-white/20" />
+                </div>
+                
+                <h3 className="text-4xl md:text-6xl font-bold tracking-[0.1em] text-white michroma-regular uppercase mb-6 drop-shadow-2xl">
+                  TechSolstice '26
+                </h3>
 
-              <div className="relative text-center p-12 md:p-16 rounded-[2.5rem] bg-[#050505]/80 backdrop-blur-2xl border border-white/10 shadow-[0_40px_80px_-20px_rgba(0,0,0,1)] overflow-hidden">
-                {/* Top Shine */}
-                <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-
-                {/* Static Design Elements: Corner Brackets */}
-                <div className="absolute top-6 left-6 w-4 h-4 border-t border-l border-white/20 rounded-tl-lg" />
-                <div className="absolute top-6 right-6 w-4 h-4 border-t border-r border-white/20 rounded-tr-lg" />
-                <div className="absolute bottom-6 left-6 w-4 h-4 border-b border-l border-white/20 rounded-bl-lg" />
-                <div className="absolute bottom-6 right-6 w-4 h-4 border-b border-r border-white/20 rounded-br-lg" />
-
-                <div className="mb-14 relative z-10">
-                  <h3 className="text-sm md:text-base font-bold tracking-[0.6em] text-transparent bg-clip-text bg-gradient-to-r from-white/80 via-white to-white/80 uppercase">
-                    TechSolstice '26
-                  </h3>
-                  {/* Decorative Line under Title */}
-                  <div className="flex items-center justify-center gap-2 mt-4 opacity-50">
-                    <div className="h-px w-8 bg-gradient-to-r from-transparent to-red-500" />
-                    <div className="h-1 w-1 bg-red-500 rounded-full" />
-                    <div className="h-px w-8 bg-gradient-to-l from-transparent to-red-500" />
+                <div className="flex items-center justify-center gap-8 text-neutral-400">
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-neutral-500">Venue</span>
+                    <span className="text-xs uppercase tracking-[0.1em] text-white">MIT Bengaluru</span>
+                  </div>
+                  <div className="w-px h-8 bg-white/10" />
+                  <div className="flex flex-col items-center">
+                    <span className="text-[10px] uppercase tracking-[0.3em] font-bold text-neutral-500">Date</span>
+                    <span className="text-xs uppercase tracking-[0.1em] text-white">Feb 20-22, 2026</span>
                   </div>
                 </div>
+              </div>
 
-                <div className="flex items-start gap-8 md:gap-16 text-white justify-center relative z-10">
+              <div className="relative p-16 md:p-24 rounded-[3rem] bg-white/[0.01] backdrop-blur-2xl border border-white/[0.05] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.8)] overflow-hidden">
+                {/* corner accents */}
+                <div className="absolute top-8 left-8 w-6 h-6 border-t border-l border-white/10" />
+                <div className="absolute top-8 right-8 w-6 h-6 border-t border-r border-white/10" />
+                <div className="absolute bottom-8 left-8 w-6 h-6 border-b border-l border-white/10" />
+                <div className="absolute bottom-8 right-8 w-6 h-6 border-b border-r border-white/10" />
+
+                <div className="flex items-start gap-12 md:gap-24 text-white justify-center relative z-10">
                   <ResponsiveCounterUnit value={countdown.days} label="Days" />
                   <Separator />
                   <ResponsiveCounterUnit value={countdown.hours} label="Hours" />
                   <Separator />
-                  <ResponsiveCounterUnit value={countdown.minutes} label="Mins" />
+                  <ResponsiveCounterUnit value={countdown.minutes} label="Minutes" />
                   <Separator />
-                  <ResponsiveCounterUnit value={countdown.seconds} label="Secs" />
+                  <ResponsiveCounterUnit value={countdown.seconds} label="Seconds" />
                 </div>
               </div>
             </div>
@@ -329,18 +308,17 @@ export function ZoomParallax({ images }: ZoomParallaxProps) {
 // ============================================================================
 
 const Separator = ({ mobile }: { mobile?: boolean }) => (
-  <div className={`flex flex-col justify-center gap-2 md:gap-3 opacity-30 ${mobile ? 'h-[40px] pt-1' : 'h-[80px]'}`}>
-    <div className={`rounded-full bg-white shadow-[0_0_5px_white] ${mobile ? 'w-0.5 h-0.5' : 'w-1 h-1'}`} />
-    <div className={`rounded-full bg-white shadow-[0_0_5px_white] ${mobile ? 'w-0.5 h-0.5' : 'w-1 h-1'}`} />
+  <div className={`flex flex-col justify-center gap-1 md:gap-3 opacity-20 ${mobile ? 'h-[30px] pt-1' : 'h-[80px]'}`}>
+    <div className={`rounded-full bg-white/50 ${mobile ? 'w-[1px] h-1.5' : 'w-[1px] h-6'}`} />
   </div>
 );
 
 const ResponsiveCounterUnit = ({ value, label }: { value: number; label: string }) => (
-  <div className="flex flex-col items-center group min-w-[3rem] md:min-w-0">
-    <span className="text-3xl sm:text-4xl md:text-8xl font-light tabular-nums tracking-tighter text-transparent bg-clip-text bg-gradient-to-b from-white via-white to-white/40 drop-shadow-lg">
+  <div className="flex flex-col items-center group min-w-[2.5rem] md:min-w-0">
+    <span className="text-3xl sm:text-4xl md:text-8xl font-normal tabular-nums tracking-tighter text-white michroma-regular leading-none">
       {String(value).padStart(2, '0')}
     </span>
-    <span className="text-[8px] md:text-xs text-neutral-500 group-hover:text-red-400/80 transition-colors duration-500 uppercase tracking-[0.3em] md:tracking-[0.4em] mt-2 md:mt-6 font-semibold">
+    <span className="text-[7px] md:text-[10px] text-neutral-500 group-hover:text-red-400/80 transition-colors duration-500 uppercase tracking-[0.3em] md:tracking-[0.5em] mt-2 md:mt-8 font-bold">
       {label}
     </span>
   </div>

@@ -2,16 +2,17 @@
   position: relative;
   width: 100%;
   overflow: hidden;
-  background: black;
-  /* Subtle Grid Background */
-  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-  background-size: 50px 50px;
-  background-position: center;
+  background: #000;
+  /* High-Tech Grid SVG Texture */
+  background-image: 
+    radial-gradient(circle at 2px 2px, rgba(220, 38, 38, 0.15) 1px, transparent 0),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M60 0H0V60' fill='none' stroke='white' stroke-opacity='0.03' stroke-width='1'/%3E%3C/svg%3E");
+  background-size: 40px 40px, 60px 60px;
+  background-attachment: fixed;
 }
 
 .introSpacer {
-  height: 30vh;
+  height: 40vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -26,25 +27,42 @@
   width: 100%;
   max-width: 1400px;
   margin: 0 auto;
-  /* Note: Padding here won't affect absolute children, 
-     so we handle spacing in .alignLeft/.alignRight below */
   height: 100%;
+  padding-bottom: 20vh;
 }
 
-/* THE MOVING DIAMOND */
+/* THE MOVING DIAMOND - Optimized for centered tracking */
 .box {
   position: absolute;
-  width: 80px;
-  height: 80px;
-  z-index: 50;
+  width: 60px;
+  height: 60px;
+  z-index: 100;
+  background: rgba(220, 38, 38, 0.2);
+  border: 2px solid #dc2626;
   border-radius: 12px;
-  background-image: url("https://assets.codepen.io/16327/flair-26.png");
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  backdrop-filter: blur(4px);
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.6);
   pointer-events: none;
-  filter: drop-shadow(0 0 15px rgba(255, 50, 50, 0.6));
+  display: flex;
+  align-items: center;
+  justify-content: center;
   will-change: transform;
+}
+
+.box::after {
+  content: '';
+  width: 50%;
+  height: 50%;
+  background: white;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  animation: pulse 2s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.5; transform: rotate(45deg) scale(0.8); }
+  50% { opacity: 1; transform: rotate(45deg) scale(1.1); }
 }
 
 /* --- ROW LAYOUTS --- */
@@ -52,130 +70,153 @@
   position: absolute;
   display: flex;
   align-items: center;
-  gap: 2rem;
+  gap: 3rem;
   width: auto;
   z-index: 10;
   transform: translateY(-50%);
 }
 
-/* DESKTOP BOUNDARIES */
-/* We use percentage or large rems to keep content centralized */
 .alignLeft {
-  left: 10%;
-  /* Moves it away from the left edge */
+  left: 5%;
   flex-direction: row;
 }
 
 .alignRight {
   left: auto;
-  right: 10%;
-  /* Moves it away from the right edge */
+  right: 5%;
   flex-direction: row-reverse;
   text-align: right;
 }
 
-/* THE MARKER */
+/* THE MARKER - Optimized for Path Hitpoints */
 .marker {
-  width: 100px;
-  height: 100px;
-  min-width: 100px;
-  border-radius: 16px;
-  background: rgba(15, 15, 15, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(8px);
+  width: 80px;
+  height: 80px;
+  min-width: 80px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: monospace;
-  font-size: 2rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.3);
-  transition: all 0.3s ease;
+  font-family: inherit;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.2);
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .stepContainer:hover .marker {
-  border-color: #ff3333;
-  color: #ff3333;
-  box-shadow: 0 0 25px rgba(255, 50, 50, 0.25);
+  border-color: rgba(220, 38, 38, 0.5);
+  color: #dc2626;
+  background: rgba(220, 38, 38, 0.05);
+  box-shadow: 0 0 30px rgba(220, 38, 38, 0.15);
+  transform: scale(1.05);
 }
 
 /* THE TEXT CARD */
 .textCard {
-  width: 350px;
+  width: 400px;
   color: white;
   z-index: 10;
+  padding: 2rem;
+  background: rgba(255, 255, 255, 0.01);
+  border-radius: 24px;
+  border: 1px solid transparent;
+  transition: all 0.4s ease;
+}
+
+.stepContainer:hover .textCard {
+  background: rgba(255, 255, 255, 0.03);
+  border-color: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  transform: translateX(10px);
+}
+
+.alignRight:hover .textCard {
+  transform: translateX(-10px);
 }
 
 .categoryTitle {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: #ff3333;
+  font-size: 1.6rem;
+  letter-spacing: -0.01em;
+  color: white;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
-  line-height: 1;
+  margin-bottom: 0.75rem;
+  line-height: 1.1;
+  font-weight: 800;
 }
 
 .categoryDesc {
-  font-size: 1rem;
-  color: #a3a3a3;
-  line-height: 1.5;
+  font-size: 0.95rem;
+  color: #888;
+  line-height: 1.6;
   font-weight: 300;
+  margin-bottom: 1.25rem;
 }
 
 .ctaLink {
-  display: inline-block;
-  margin-top: 1rem;
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.15em;
-  color: white;
-  opacity: 0.6;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-  padding-bottom: 4px;
+  letter-spacing: 0.3em;
+  color: rgba(255, 255, 255, 0.4);
+  font-weight: 700;
   transition: all 0.3s ease;
+  position: relative;
+}
+
+.ctaLink::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #dc2626;
+  transition: width 0.3s ease;
 }
 
 .ctaLink:hover {
-  color: #ff3333;
-  border-color: #ff3333;
+  color: white;
   opacity: 1;
+}
+
+.ctaLink:hover::after {
+  width: 100%;
 }
 
 /* --- MOBILE RESPONSIVENESS --- */
 @media (max-width: 768px) {
-
-  /* FORCE MARGINS ON MOBILE */
-  /* Instead of left: 0, we give it safe breathing room */
   .alignLeft {
-    left: 1.5rem;
-    /* ~24px safe margin from left edge */
+    left: 1rem;
   }
 
   .alignRight {
-    right: 1.5rem;
-    /* ~24px safe margin from right edge */
+    right: 1rem;
   }
 
-  /* Reduce sizes for mobile fit */
   .box {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
   }
 
   .marker {
-    width: 60px;
-    height: 60px;
-    min-width: 60px;
-    font-size: 1.25rem;
-    border-radius: 10px;
+    width: 70px;
+    height: 70px;
+    min-width: 70px;
+    font-size: 1.1rem;
+    border-radius: 15px;
   }
 
   .textCard {
-    /* Dynamic width calculation to ensure it fits: 
-       100vw - (Margin * 2) - MarkerWidth - Gap */
-    width: calc(100vw - 3rem - 60px - 1rem);
-    max-width: 300px;
+    width: calc(100vw - 3rem - 70px - 1rem);
+    max-width: 320px;
+    padding: 1rem;
   }
 
   .stepContainer {
@@ -187,10 +228,9 @@
   }
 
   .categoryDesc {
-    font-size: 0.85rem;
-    /* Limit lines to prevent text blocks overlapping vertically */
-    display: -webkit-box;
+    font-size: 0.8rem;
     -webkit-line-clamp: 3;
+    display: -webkit-box;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
